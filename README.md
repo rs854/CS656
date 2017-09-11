@@ -2,10 +2,10 @@
 Fall 2017 Networking Course
 
 ## Team Members
-Eugene Turgil
-Robert Smith
-Weng Li
-Meghna Agnish
+- Eugene Turgil
+- Robert Smith
+- Weng Li
+- Meghna Agnish
 
 ## Installation Instructions
 
@@ -20,3 +20,7 @@ Meghna Agnish
 ## Roles & Responsibilities
 
 To be defined...
+
+## GIT Repository Rules
+
+If you are creating a feature, fork off a development branch. Do all work there, once it is unit tested/accepted we can merge it into development branch.
