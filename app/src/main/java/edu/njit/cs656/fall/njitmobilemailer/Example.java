@@ -4,4 +4,8 @@ package edu.njit.cs656.fall.njitmobilemailer;
 // Place acitivities ehre
 public class Example {
 
+    @Override
+    public String toString() {
+        return "Example Class";
+    }
 }
