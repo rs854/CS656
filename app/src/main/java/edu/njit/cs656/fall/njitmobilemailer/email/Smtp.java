@@ -20,33 +20,17 @@ public class Smtp {
 
     private static final String TAG = "SMTP";
 
-    public void ConnectServer() {
+    private SSLSocket mailServerSocket;
+
+    public boolean ConnectServer() {
 
         try {
             SSLSocketFactory socketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            SSLSocket mailServer = (SSLSocket) socketFactory.createSocket("smtp.gmail.com", 465);
+            mailServerSocket = (SSLSocket) socketFactory.createSocket("smtp.gmail.com", 465);
 
-            InputStream readStream = mailServer.getInputStream();
-            InputStreamReader readerStream = new InputStreamReader(readStream);
-            BufferedReader reader = new BufferedReader(readerStream);
-            OutputStream writeStream = mailServer.getOutputStream();
-
-            //Log.d(TAG, "All Streams Established.");
-
-            System.out.println("Streams Established.");
-
-
-            String firstLine = reader.readLine();
-            System.out.println(firstLine);
-
-            readStream.close();
-            writeStream.close();
-            mailServer.close();
-
-            System.out.println("Streams Closed.");
-            //Log.d(TAG, "All Streams Closed.");
+            return mailServerSocket.isConnected();
         } catch ( IOException e ) {
-
+            return false;
         }
 
         // connect using ssl socket
@@ -59,4 +43,18 @@ public class Smtp {
         // then data
     }
 
+    public void sendMessage() {
+
+    }
+
+    public boolean DestroyServer() {
+        try {
+            mailServerSocket.close();
+
+            return !mailServerSocket.isConnected();
+        } catch ( IOException e ) {
+            return false;
+        }
+
+    }
 }
