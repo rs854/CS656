@@ -27,4 +27,9 @@ If you are creating a feature, fork off a development branch. Do all work there,
 
 ## References
 
-https://www.ietf.org/rfc/rfc2821.txt
+### SMTP
+
+ - https://www.ietf.org/rfc/rfc2821.txt
+
+### IMAP 
+ - https://tools.ietf.org/html/rfc3501
