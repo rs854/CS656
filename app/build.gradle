@@ -35,4 +35,10 @@ dependencies {
     androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
     compile 'com.android.support:appcompat-v7:25.0.1'
     testCompile 'junit:junit:4.12'
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.2'
+    testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: '1.5.1'
+    testCompile 'org.mockito:mockito-all:1.9.5'
+    testCompile 'org.powermock:powermock-api-mockito:1.5.5'
+
 }

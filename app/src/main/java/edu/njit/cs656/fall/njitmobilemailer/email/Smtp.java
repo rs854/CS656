@@ -4,10 +4,7 @@ package edu.njit.cs656.fall.njitmobilemailer.email;
  * Created by Eugene on 9/19/2017.
  */
 
-import android.util.Base64;
-import android.util.Log;
-
-import java.io.BufferedInputStream;
+import org.apache.commons.codec.binary.Base64;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -15,8 +12,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.Buffer;
-import java.nio.channels.Pipe;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -24,6 +19,8 @@ import javax.net.ssl.SSLSocketFactory;
 public class Smtp {
 
     private static final String TAG = "SMTP";
+    private static final String USERNAME = "et24@njit.edu";
+    private static final String PASSWORD = "";
 
     private SSLSocket mailServerSocket;
 
@@ -37,31 +34,51 @@ public class Smtp {
         } catch ( IOException e ) {
             return false;
         }
+    }
 
-        // connect using ssl socket
-        // send EHLO njit.edu
-        // auth plain base64_encoded (\000email\@domain.com\000password)
-        // mmehvqtechoalpqi
-        // mail from: <et24@njit.edu>
-        // rcpt to: mail from: <et24@njit.edu>
-        // data
-        // then data
+    public boolean isConnected() {
+        return mailServerSocket.isConnected();
+    }
+
+    public String encode(String text) {
+
+        byte[] base64EncodedAuthenticationBytes = Base64.encodeBase64(text.getBytes());
+
+        String encodedData = new String(base64EncodedAuthenticationBytes);
+
+        return encodedData;
+    }
+
+    public String decode(String text) {
+        byte[] base64DecodedAuthenticationBytes = Base64.decodeBase64(text.getBytes());
+
+        String decodedData = new String(base64DecodedAuthenticationBytes);
+
+        return decodedData;
     }
 
     private boolean authenticateUser(String username, String password, BufferedWriter writer, BufferedReader reader) {
-        StringBuilder authenticationString = new StringBuilder();
-        authenticationString.append("\\000");
-        authenticationString.append(username.substring(0, username.indexOf('@') -1));
-        authenticationString.append(username.substring( username.indexOf('@'), username.length()));
-        authenticationString.append("\\000");
-        authenticationString.append(password);
-
-        byte[] stringArray = new byte[authenticationString.length()];
-        String base64EncodedAuthenticationString = Base64.encodeToString(authenticationString.toString().getBytes(), 0);
 
         try {
-            writer.write(String.format("auth plain %s", base64EncodedAuthenticationString));
+            //encode(username), encode(password));
+
+            writer.write(String.format("AUTH LOGIN\r\n"));
+            writer.flush();
+
             String response = reader.readLine();
+            System.out.println(response);
+
+            writer.write(String.format("%s\r\n", encode(username)));
+            writer.flush();
+
+            response = reader.readLine();
+            System.out.println(response);
+
+            writer.write(String.format("%s\r\n", encode(password)));
+            writer.flush();
+
+            response = reader.readLine();
+            System.out.println(response);
 
             if(response.indexOf("Accepted") < 0 ) {
                 return false;
@@ -72,7 +89,7 @@ public class Smtp {
             return false;
         }
     }
-    public String sendMail(String to, String from, String data) {
+    public String sendMail(Mail email) {
         try {
             InputStream readStream = mailServerSocket.getInputStream();
             InputStreamReader readerStream = new InputStreamReader(readStream);
@@ -83,7 +100,48 @@ public class Smtp {
             BufferedWriter writer = new BufferedWriter(writerStream);
 
             String message = reader.readLine();
-            writer.write("EHLO njit.edu");
+            System.out.println(message);
+
+            writer.write("EHLO njit.edu\r\n");
+            writer.flush();
+
+            while(((message = reader.readLine()) != null)) {
+                System.out.println(message);
+                if(!reader.ready()) break;
+            }
+
+
+            // authenticate user
+            if(authenticateUser(USERNAME, PASSWORD, writer, reader)) {
+                System.out.println("Authentication successful");
+
+                writer.write(String.format("MAIL FROM: <%s>\r\n", email.getFromClient()));
+                writer.flush();
+
+                message = reader.readLine();
+                System.out.println(message);
+
+                writer.write(String.format("RCPT TO: <%s>\r\n", email.getToClient()));
+                writer.flush();
+
+                message = reader.readLine();
+                System.out.println(message);
+
+                writer.write("DATA\r\n");
+                writer.flush();
+
+                message = reader.readLine();
+                System.out.println(message);
+
+                writer.write(email.toString());
+                writer.flush();
+
+                message = reader.readLine();
+                System.out.println(message);
+
+            } else {
+                System.out.println("Authentication failed.");
+            }
 
             reader.close();
             readerStream.close();
