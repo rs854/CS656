@@ -19,7 +19,7 @@ import javax.net.ssl.SSLSocketFactory;
 public class Smtp {
 
     private static final String TAG = "SMTP";
-    private static final String USERNAME = "et24@njit.edu";
+    private static final String USERNAME = "";
     private static final String PASSWORD = "";
 
     private SSLSocket mailServerSocket;
