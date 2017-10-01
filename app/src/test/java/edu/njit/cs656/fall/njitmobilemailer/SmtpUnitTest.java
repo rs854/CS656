@@ -41,14 +41,12 @@ public class SmtpUnitTest {
         String decoded = new String(smtp.decode(encoded));
         assertEquals(decoded, "test@test");
 
-        smtp.ConnectServer();
-        assertEquals(smtp.isConnected(), true);
+        try {
+            smtp.send(email);
 
-        smtp.sendMail(email);
-    }
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
 
-    @After
-    public void destroy() {
-        smtp.DestroyServer();
+        }
     }
 }

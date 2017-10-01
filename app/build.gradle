@@ -40,5 +40,6 @@ dependencies {
     testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: '1.5.1'
     testCompile 'org.mockito:mockito-all:1.9.5'
     testCompile 'org.powermock:powermock-api-mockito:1.5.5'
+    compile 'com.google.android.gms:play-services-auth:9.8.0'
 
 }

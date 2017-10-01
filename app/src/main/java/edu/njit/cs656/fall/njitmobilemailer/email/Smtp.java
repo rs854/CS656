@@ -16,154 +16,62 @@ import java.io.OutputStreamWriter;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-public class Smtp {
+public class Smtp extends Connection {
 
-    private static final String TAG = "SMTP";
-    private static final String USERNAME = "";
-    private static final String PASSWORD = "";
+    private static final String TAG = Smtp.class.getSimpleName();
 
-    private SSLSocket mailServerSocket;
-
-    public boolean ConnectServer() {
-
-        try {
-            SSLSocketFactory socketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            mailServerSocket = (SSLSocket) socketFactory.createSocket("smtp.gmail.com", 465);
-
-            return mailServerSocket.isConnected();
-        } catch ( IOException e ) {
-            return false;
-        }
+    public Smtp() {
+        super();
+        setHost("smtp.gmail.com");
+        setPort(465);
     }
 
-    public boolean isConnected() {
-        return mailServerSocket.isConnected();
-    }
+    public void send(Mail mail) throws Exception {
+        String response;
 
-    public String encode(String text) {
+        ConnectServer();
 
-        byte[] base64EncodedAuthenticationBytes = Base64.encodeBase64(text.getBytes());
+        response = readData();
 
-        String encodedData = new String(base64EncodedAuthenticationBytes);
+        writeData("EHLO njit.edu");
 
-        return encodedData;
-    }
+        response = readData();
 
-    public String decode(String text) {
-        byte[] base64DecodedAuthenticationBytes = Base64.decodeBase64(text.getBytes());
+        writeData("AUTH LOGIN");
 
-        String decodedData = new String(base64DecodedAuthenticationBytes);
+        response = readData();
 
-        return decodedData;
-    }
+        writeData(encode("et24@njit.edu"));
 
-    private boolean authenticateUser(String username, String password, BufferedWriter writer, BufferedReader reader) {
+        response = readData();
 
-        try {
-            //encode(username), encode(password));
+        writeData(encode(""));
 
-            writer.write(String.format("AUTH LOGIN\r\n"));
-            writer.flush();
+        response = readData();
 
-            String response = reader.readLine();
-            System.out.println(response);
+        if(response.indexOf("Accepted") < 0) {
+            DestroyServer();
 
-            writer.write(String.format("%s\r\n", encode(username)));
-            writer.flush();
+            throw new Exception("ERROR: Unable to authenticate.");
 
-            response = reader.readLine();
-            System.out.println(response);
+        } else {
+            writeData(String.format("MAIL FROM: <%s>", mail.getFromClient()));
 
-            writer.write(String.format("%s\r\n", encode(password)));
-            writer.flush();
+            response = readData();
 
-            response = reader.readLine();
-            System.out.println(response);
+            writeData(String.format("RCPT TO: <%s>", mail.getToClient()));
 
-            if(response.indexOf("Accepted") < 0 ) {
-                return false;
-            } else {
-                return true;
-            }
-        } catch (IOException e) {
-            return false;
-        }
-    }
-    public String sendMail(Mail email) {
-        try {
-            InputStream readStream = mailServerSocket.getInputStream();
-            InputStreamReader readerStream = new InputStreamReader(readStream);
-            BufferedReader reader = new BufferedReader(readerStream);
+            response = readData();
 
-            OutputStream writeStream = mailServerSocket.getOutputStream();
-            OutputStreamWriter writerStream = new OutputStreamWriter(writeStream);
-            BufferedWriter writer = new BufferedWriter(writerStream);
+            writeData("DATA");
 
-            String message = reader.readLine();
-            System.out.println(message);
+            response = readData();
 
-            writer.write("EHLO njit.edu\r\n");
-            writer.flush();
+            writeData(mail.toString());
 
-            while(((message = reader.readLine()) != null)) {
-                System.out.println(message);
-                if(!reader.ready()) break;
-            }
-
-
-            // authenticate user
-            if(authenticateUser(USERNAME, PASSWORD, writer, reader)) {
-                System.out.println("Authentication successful");
-
-                writer.write(String.format("MAIL FROM: <%s>\r\n", email.getFromClient()));
-                writer.flush();
-
-                message = reader.readLine();
-                System.out.println(message);
-
-                writer.write(String.format("RCPT TO: <%s>\r\n", email.getToClient()));
-                writer.flush();
-
-                message = reader.readLine();
-                System.out.println(message);
-
-                writer.write("DATA\r\n");
-                writer.flush();
-
-                message = reader.readLine();
-                System.out.println(message);
-
-                writer.write(email.toString());
-                writer.flush();
-
-                message = reader.readLine();
-                System.out.println(message);
-
-            } else {
-                System.out.println("Authentication failed.");
-            }
-
-            reader.close();
-            readerStream.close();
-            readStream.close();
-
-            writer.close();
-            writerStream.close();
-            writeStream.close();
-        } catch ( IOException e ) {
-            return null;
-        }
-        return null;
-    }
-
-    public boolean DestroyServer() {
-        try {
-            mailServerSocket.close();
-
-            return !mailServerSocket.isConnected();
-        } catch ( IOException e ) {
-            return false;
+            response = readData();
         }
 
+        DestroyServer();
     }
 }
