@@ -12,8 +12,7 @@ import javax.activation.*;
 
 public class Send {
 
-    private static final String mx = "smtp.gmail.com";
-    private static final String host = "njit.edu";
+    private static final String host = "smtp.gmail.com";
 
     public static void Email(Mail letter) {
         Properties properties = System.getProperties();
