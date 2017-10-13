@@ -30,11 +30,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.commons/commons-collections4
     compile group: 'commons-codec', name: 'commons-codec', version: '1.2'
     testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: '1.5.1'
-
-    compile 'com.android.support:appcompat-v7:25.0.1'
-    compile 'com.google.android.gms:play-services-auth:9.8.0'
     compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support.constraint:constraint-layout:+'
     compile group: 'javax.mail', name: 'mail', version: '1.4'
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-all:1.9.5'
