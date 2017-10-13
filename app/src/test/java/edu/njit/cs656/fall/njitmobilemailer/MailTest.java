@@ -23,16 +23,47 @@ public class MailTest {
     @Test
     public void testToClient() {
         final String testText = "test@test.com";
-        email.setToClient(testText);
+        try {
+            email.setToClient(testText);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         assertEquals(testText, email.getToClient());
     }
 
     @Test
     public void testFromClient() {
         final String testText = "tester@tester.com";
-        email.setFromClient(testText);
+        try {
+            email.setFromClient(testText);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         assertEquals(testText, email.getFromClient());
     }
+
+    @Test
+    public void testToClientInvalid() {
+        final String testText = "JLNKASFFNLS$(@*#(&^*%@(&*";
+        try {
+            email.setToClient(testText);
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "ERR: Invalid email.");
+        }
+        assertEquals(true, email.getFromClient().isEmpty());
+    }
+
+    @Test
+    public void testFromClientInvalid() {
+        final String testText = "^&*$%@*&^^&*@$&^*JKNFSJKNLFSNJKLF3498198732927843";
+        try {
+            email.setFromClient(testText);
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "ERR: Invalid email.");
+        }
+        assertEquals(true, email.getFromClient().isEmpty());
+    }
+
 
     @Test
     public void testSubject() {

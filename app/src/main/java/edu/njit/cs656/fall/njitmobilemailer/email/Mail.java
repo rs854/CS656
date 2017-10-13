@@ -4,6 +4,8 @@ package edu.njit.cs656.fall.njitmobilemailer.email;
  * Created by Eugen on 9/20/2017.
  */
 
+import org.apache.commons.validator.routines.EmailValidator;
+
 import java.util.*;
 
 public class Mail {
@@ -19,9 +21,13 @@ public class Mail {
         return fromClient;
     }
 
-    public void setFromClient(String fromClient) {
-
-        this.fromClient = fromClient;
+    public void setFromClient(final String fromClient)  throws Exception {
+        EmailValidator validator = EmailValidator.getInstance();
+        if(validator.isValid(fromClient)) {
+            this.fromClient = fromClient;
+        } else {
+            throw new Exception("ERR: Invalid email.");
+        }
     }
 
 
@@ -30,8 +36,13 @@ public class Mail {
         return toClient;
     }
 
-    public void setToClient(String toClient) {
-        this.toClient = toClient;
+    public void setToClient(final String toClient)  throws Exception  {
+        EmailValidator validator = EmailValidator.getInstance();
+        if(validator.isValid(toClient)) {
+            this.toClient = toClient;
+        } else {
+            throw new Exception("ERR: Invalid email.");
+        }
     }
 
     public List<String> getCcClient() {
@@ -39,9 +50,13 @@ public class Mail {
         return ccClient;
     }
 
-    public void addCcClient(String ccClient) {
-
-        this.ccClient.add(ccClient);
+    public void addCcClient(final String ccClient) throws Exception {
+        EmailValidator validator = EmailValidator.getInstance();
+        if(validator.isValid(toClient)) {
+            this.ccClient.add(ccClient);
+        } else {
+            throw new Exception("ERR: Invalid email.");
+        }
     }
 
 
