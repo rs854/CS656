@@ -28,9 +28,23 @@ public class MailTest {
     }
 
     @Test
+    public void testFromClient() {
+        final String testText = "tester@tester.com";
+        email.setFromClient(testText);
+        assertEquals(testText, email.getFromClient());
+    }
+
+    @Test
     public void testSubject() {
         final String testText = "TEST";
         email.setSubject(testText);
         assertEquals(testText, email.getSubject());
+    }
+
+    @Test
+    public void testMessage() {
+        final String testText = "HELLO";
+        email.setMessage(testText);
+        assertEquals(testText, email.getMessage());
     }
 }
