@@ -10,6 +10,7 @@ import org.junit.Test;
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotSame;
 
 public class MailTest {
 
@@ -50,7 +51,7 @@ public class MailTest {
         } catch (Exception e) {
             assertEquals(e.getMessage(), "ERR: Invalid email.");
         }
-        assertEquals(true, email.getFromClient().isEmpty());
+        assertNotSame(testText, email.getToClient());
     }
 
     @Test
@@ -61,7 +62,7 @@ public class MailTest {
         } catch (Exception e) {
             assertEquals(e.getMessage(), "ERR: Invalid email.");
         }
-        assertEquals(true, email.getFromClient().isEmpty());
+        assertNotSame(testText, email.getFromClient());
     }
 
 
