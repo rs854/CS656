@@ -8,7 +8,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 
 import java.util.*;
 
-public class Mail {
+public class Mail { // TODO: I might delete this later on due to javax already having Message class
 
     private String fromClient;
     private String toClient;
