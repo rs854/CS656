@@ -9,21 +9,24 @@ import java.util.*;
 public class Mail {
 
     private String fromClient;
-    private String subject;
     private String toClient;
+    private String subject;
     private List<String> ccClient;
     private String message;
 
     public String getFromClient() {
+
         return fromClient;
     }
 
     public void setFromClient(String fromClient) {
+
         this.fromClient = fromClient;
     }
 
 
     public String getToClient() {
+
         return toClient;
     }
 
@@ -32,27 +35,33 @@ public class Mail {
     }
 
     public List<String> getCcClient() {
+
         return ccClient;
     }
 
     public void addCcClient(String ccClient) {
+
         this.ccClient.add(ccClient);
     }
 
 
     public String getSubject() {
+
         return subject;
     }
 
     public void setSubject(String subject) {
+
         this.subject = subject;
     }
 
     public String getMessage() {
+
         return message;
     }
 
     public void setMessage(String message) {
+
         this.message = message;
     }
 

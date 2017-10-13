@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
-import edu.njit.cs656.fall.njitmobilemailer.email.Imap;
 
 /**
  * Created by eugeneturgil on 9/23/17.

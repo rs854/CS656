@@ -1,12 +1,10 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static junit.framework.TestCase.assertEquals;
 
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
-import edu.njit.cs656.fall.njitmobilemailer.email.Smtp;
 
 /**
  * Created by Eugen on 9/19/2017.
