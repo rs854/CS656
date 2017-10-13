@@ -16,7 +16,7 @@ public class Send {
 
     public static void Email(Mail letter) {
         Properties properties = System.getProperties();
-        properties.setProperty("mail.smtp.host", host);
+        properties.setProperty("mail.smtp.host", host); // TODO: 10/12/2017 Add SSL/TLS port
         properties.setProperty("mail.user", "");
         properties.setProperty("mail.password", "");
 
