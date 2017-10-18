@@ -24,3 +24,12 @@ To be defined...
 ## GIT Repository Rules
 
 If you are creating a feature, fork off a development branch. Do all work there, once it is unit tested/accepted we can merge it into development branch.
+
+## References
+
+### SMTP
+
+ - https://www.ietf.org/rfc/rfc2821.txt
+
+### IMAP 
+ - https://tools.ietf.org/html/rfc3501
