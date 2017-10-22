@@ -25,6 +25,15 @@ To be defined...
 
 If you are creating a feature, fork off a development branch. Do all work there, once it is unit tested/accepted we can merge it into development branch.
 
+## Credential Implementation (Temporary until we get proper authentication system)
+
+Currently, I have implemented a temporary way to access credentials without hard coding them into the code. What you can do, until we get a better authentication management system is to set your environment variables to your credentials.
+1. Click on the project right next to the Run button.
+2. Select 'Edit Configurations'
+3. Under VM options, type "-Dusername=username -Dpassword=password*" and replace the value password/username with your username and password respectively.
+
+*I would go to the sign in security center on google and generate a temporary app password so you do not have to worry about changing the password.
+
 ## References
 
 ### SMTP

@@ -13,8 +13,6 @@ import javax.activation.*;
 public class Send {
 
     private static final String host = "smtp.gmail.com";
-    private static final String username = "et24@njit.edu";
-    private static final String password = "test"; // TODO: cannot store password in plain text
 
     public static void Email(Mail letter) {
         Properties properties = new Properties();
@@ -27,7 +25,7 @@ public class Send {
                 new Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(username, password);
+                        return new PasswordAuthentication(System.getProperty("username"), System.getProperty("password"));
                     }
                 });
 
