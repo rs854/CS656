@@ -1,22 +1,13 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.view.View;
-import android.content.Context;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import android.view.LayoutInflater;
-import android.util.Log;
-
-
-
-import org.w3c.dom.Text;
 
 
 public class ListMail extends AppCompatActivity {
