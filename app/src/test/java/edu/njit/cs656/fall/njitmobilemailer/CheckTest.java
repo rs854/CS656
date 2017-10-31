@@ -23,7 +23,7 @@ public class CheckTest {
 
         Check check = new Check();
 
-        check.TestEmail();
+        check.Email();
     }
 
 }

@@ -5,9 +5,8 @@ package edu.njit.cs656.fall.njitmobilemailer.email;
  */
 
 
-import android.util.Log;
-
-import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -20,76 +19,81 @@ import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 public class Check {
 
     private static final String TAG = "CheckMail";
+    private Message[] messages;
+    private Lock lock;
 
-    public void TestEmail() {
-        try {
-            Authentication authentication = new Authentication();
-            System.out.println(TAG + "Authentication set up.");
+    public Check() {
+        lock = new ReentrantLock();
+    }
 
-            Session emailSession = Session.getDefaultInstance(authentication.getPOP3Properties());
-            System.out.println(TAG + "Properties set up.");
+    public synchronized Message[] getMessages() {
+        return messages;
+    }
 
-            Store store = emailSession.getStore("pop3s");
-            System.out.println(TAG + "Store set up.");
+    private synchronized void setMessages(Message[] messages) {
+        messages = messages;
+    }
 
-            store.connect("pop.gmail.com", authentication.getUsername(), authentication.getPassword());
-            System.out.println(TAG + "Connection set up.");
+    public synchronized int getNumberMessages() {
+        return messages.length;
+    }
 
-            Folder emailFolder = store.getFolder("INBOX");
-            System.out.println(TAG + "Inbox set up.");
+    public synchronized boolean isEmptyMessages() {
+        return messages.length == 0;
+    }
 
-            emailFolder.open(Folder.READ_ONLY);
+    public void setCallback(MessageService messageService) {
+        messages = messageService.callback();
+    }
 
-            Message[] messages = emailFolder.getMessages();
+    public void Email() {
+        Thread sub = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                setCallback(new MessageService() {
+                    @Override
+                    public Message[] callback() {
+                        try {
+                            Authentication authentication = new Authentication();
 
-            for (int i = 0, n = messages.length; i < n; i++) {
-                System.out.println(TAG + "---------------------------------");
-                System.out.println(TAG + "Email Number " + (i + 1));
-                System.out.println(TAG + "Subject: " + messages[i].getSubject());
-                System.out.println(TAG + "From: " + messages[i].getFrom()[0]);
-                System.out.println(TAG + "Text: " + messages[i].getContent().toString());
+                            Session emailSession = Session.getDefaultInstance(authentication.getIMAPProperties());
+
+                            Store store = emailSession.getStore("imaps");
+
+                            store.connect("imap.gmail.com", authentication.getUsername(), authentication.getPassword());
+
+                            Folder emailFolder = store.getFolder("INBOX");
+
+                            emailFolder.open(Folder.READ_WRITE);
+
+                            Message[] subMessages = emailFolder.getMessages();
+
+                            emailFolder.close(false);
+                            store.close();
+
+                            return subMessages.clone();
+                        } catch (MessagingException e) {
+                            e.printStackTrace();
+                        }
+                        return null;
+                    }
+                });
             }
+        });
 
-            emailFolder.close(false);
-            store.close();
-        } catch (MessagingException | IOException e) {
+        try
+
+        {
+            sub.start();
+            sub.join();
+        } catch (InterruptedException e)
+
+        {
             e.printStackTrace();
         }
     }
 
-    public void Email() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Authentication authentication = new Authentication();
-
-                    Session emailSession = Session.getDefaultInstance(authentication.getPOP3Properties());
-
-                    Store store = emailSession.getStore("pop3s");
-
-                    store.connect("pop.gmail.com", authentication.getUsername(), authentication.getPassword());
-
-                    Folder emailFolder = store.getFolder("INBOX");
-
-                    emailFolder.open(Folder.READ_ONLY);
-
-                    Message[] messages = emailFolder.getMessages();
-
-                    for (int i = 0, n = messages.length; i < n; i++) {
-                        Log.v(TAG, "---------------------------------");
-                        Log.v(TAG, "Email Number " + (i + 1));
-                        Log.v(TAG, "Subject: " + messages[i].getSubject());
-                        Log.v(TAG, "From: " + messages[i].getFrom()[0]);
-                        Log.v(TAG, "Text: " + messages[i].getContent().toString());
-                    }
-
-                    emailFolder.close(false);
-                    store.close();
-                } catch (MessagingException | IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+    private interface MessageService {
+        Message[] callback();
     }
 }

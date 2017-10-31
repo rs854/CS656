@@ -5,11 +5,6 @@ package edu.njit.cs656.fall.njitmobilemailer.email;
  */
 
 
-import java.util.*;
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
-
 public class Receive {
 
     private static final String host = "smtp.gmail.com";

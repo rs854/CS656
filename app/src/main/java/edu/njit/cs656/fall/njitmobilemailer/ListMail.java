@@ -9,6 +9,11 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+
+import edu.njit.cs656.fall.njitmobilemailer.email.Check;
+
 
 public class ListMail extends AppCompatActivity {
 
@@ -33,15 +38,24 @@ public class ListMail extends AppCompatActivity {
 
         LayoutInflater inflater = LayoutInflater.from(this);
 
-        for (int i = 0; i < 10; i++) {
-            tableRows[i] = new TableRow(this);
-            final View customView = inflater.inflate(R.layout.data_item, tableRows[i], false);
-            ((TextView) customView.findViewById(R.id.view_subject)).setText("SUBJECT");
-            tableRows[i].addView(customView, rowParams);
+        Check check = new Check();
+        check.Email();
+        Message[] messages = check.getMessages();
 
-            tableLayout.addView(tableRows[i], tableParams);
+        try {
 
-            Log.v(TAG, "ADDED INDEX: " + i);
+            for (int i = 0; i < check.getNumberMessages(); i++) {
+                tableRows[i] = new TableRow(this);
+                final View customView = inflater.inflate(R.layout.data_item, tableRows[i], false);
+                ((TextView) customView.findViewById(R.id.view_subject)).setText(messages[i].getSubject());
+                tableRows[i].addView(customView, rowParams);
+
+                tableLayout.addView(tableRows[i], tableParams);
+
+                Log.v(TAG, "ADDED INDEX: " + i);
+            }
+        } catch (MessagingException e) {
+            e.printStackTrace();
         }
         //TextView textViewEmailBrief = (TextView) findViewById(R.id.email_brief_content);
         //TextView textViewSubject = (TextView) findViewById(R.id.email_subject);
