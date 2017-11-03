@@ -1,77 +1,102 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
 
-import edu.njit.cs656.fall.njitmobilemailer.email.Check;
+import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
+import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
 
 
 public class ListMail extends AppCompatActivity {
 
     private static final String TAG = "ListMail";
+    private TableRow[] tableRows;
+    private TableLayout.LayoutParams tableParams;
+    private TableRow.LayoutParams rowParams;
+    private LayoutInflater inflater;
+    private TableLayout tableLayout;
+    private ListMail reference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_mail);
 
-        //TableLayout tableLayout = new TableLayout(); (TableLayout) findViewById(R.id.list_email_table);
+        tableLayout = (TableLayout) findViewById(R.id.list_email_table);
 
-        TableLayout tableLayout = (TableLayout) findViewById(R.id.list_email_table);
 
-        // Loop Start
-        final TableRow[] tableRows = new TableRow[10];
+        reference = this;
+        inflater = LayoutInflater.from(this);
 
-        final TableLayout.LayoutParams tableParams =
-                new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
-        final TableRow.LayoutParams rowParams =
-                new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1);
+        new Updater().execute(new Authentication());
+    }
 
-        LayoutInflater inflater = LayoutInflater.from(this);
 
-        Check check = new Check();
-        check.Email();
-        Message[] messages = check.getMessages();
+    public class Updater extends AsyncTask<Authentication, Integer, List<Mail>> {
 
-        try {
+        @Override
+        protected void onPostExecute(List<Mail> messages) {
+            super.onPostExecute(messages);
 
-            for (int i = 0; i < check.getNumberMessages(); i++) {
-                tableRows[i] = new TableRow(this);
-                final View customView = inflater.inflate(R.layout.data_item, tableRows[i], false);
-                ((TextView) customView.findViewById(R.id.view_subject)).setText(messages[i].getSubject());
+            tableRows = new TableRow[messages.size()];
+            tableParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
+            rowParams = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1);
+
+            for (int i = 0; i < messages.size(); i++) {
+                tableRows[i] = new TableRow(reference);
+                View customView = inflater.inflate(R.layout.data_item, tableRows[i], false);
+                ((TextView) customView.findViewById(R.id.view_subject)).setText(messages.get(i).getSubject());
                 tableRows[i].addView(customView, rowParams);
 
                 tableLayout.addView(tableRows[i], tableParams);
-
-                Log.v(TAG, "ADDED INDEX: " + i);
             }
-        } catch (MessagingException e) {
-            e.printStackTrace();
         }
-        //TextView textViewEmailBrief = (TextView) findViewById(R.id.email_brief_content);
-        //TextView textViewSubject = (TextView) findViewById(R.id.email_subject);
-        //TextView textViewFrom = (TextView) findViewById(R.id.email_from);
 
-        //textViewEmailBrief.setText("TEST EMAIL BRIEF");
-        //textViewSubject.setText("TEST EMAIL SUBJECT");
-        //textViewFrom.setText("TEST EMAIL FROM");
+        @Override
+        protected List<Mail> doInBackground(Authentication... authentication) {
 
-        //tableRow.addView(textViewEmailBrief);
-        //tableRow.addView(textViewSubject);
-        //tableRow.addView(textViewFrom);
+            try {
+                Session emailSession = Session.getDefaultInstance(authentication[0].getIMAPProperties());
 
-        //tableLayout.addView(tableRow);
-        // Loop End
+                Store store = emailSession.getStore("imaps");
+
+                store.connect("imap.gmail.com", authentication[0].getUsername(), authentication[0].getPassword());
+
+                Folder emailFolder = store.getFolder("INBOX");
+
+                emailFolder.open(Folder.READ_WRITE);
+                Message[] messages = emailFolder.getMessages();
+                List<Mail> messageList = new ArrayList<Mail>();
 
 
+                for (int i = 0; i < messages.length; i++) {
+                    Mail mail = new Mail();
+                    mail.setSubject(messages[i].getSubject());
+                    messageList.add(mail);
+                }
+
+                emailFolder.close(false);
+                store.close();
+
+                return messageList;
+            } catch (MessagingException e) {
+                return null;
+            }
+        }
     }
 }

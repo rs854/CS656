@@ -51,7 +51,6 @@ public class Authentication {
     public Properties getSMTPProperties() {
         return smtpProperties;
     }
-
     public Properties getIMAPProperties() {
         return imapProperties;
     }
