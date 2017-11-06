@@ -17,6 +17,8 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.event.MessageCountEvent;
+import javax.mail.event.MessageCountListener;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
@@ -31,6 +33,9 @@ public class ListMail extends AppCompatActivity {
     private LayoutInflater inflater;
     private TableLayout tableLayout;
     private ListMail reference;
+    private List<Mail> messages;
+
+    private
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,25 +51,32 @@ public class ListMail extends AppCompatActivity {
         new Updater().execute(new Authentication());
     }
 
+    protected void setMessages(List<Mail> messages) {
+        this.messages = messages;
+    }
 
+    protected void drawMessages(List<Mail> messages) {
+        tableRows = new TableRow[messages.size()];
+        tableParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
+        rowParams = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1);
+
+        for (int i = 0; i < messages.size(); i++) {
+            tableRows[i] = new TableRow(this);
+            View customView = inflater.inflate(R.layout.data_item, tableRows[i], false);
+
+            ((TextView) customView.findViewById(R.id.view_subject)).setText(messages.get(i).getSubject());
+
+            tableRows[i].addView(customView, rowParams);
+
+            tableLayout.addView(tableRows[i], tableParams);
+        }
+    }
     public class Updater extends AsyncTask<Authentication, Integer, List<Mail>> {
 
         @Override
         protected void onPostExecute(List<Mail> messages) {
             super.onPostExecute(messages);
-
-            tableRows = new TableRow[messages.size()];
-            tableParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
-            rowParams = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1);
-
-            for (int i = 0; i < messages.size(); i++) {
-                tableRows[i] = new TableRow(reference);
-                View customView = inflater.inflate(R.layout.data_item, tableRows[i], false);
-                ((TextView) customView.findViewById(R.id.view_subject)).setText(messages.get(i).getSubject());
-                tableRows[i].addView(customView, rowParams);
-
-                tableLayout.addView(tableRows[i], tableParams);
-            }
+            drawMessages(messages);
         }
 
         @Override
@@ -80,15 +92,59 @@ public class ListMail extends AppCompatActivity {
                 Folder emailFolder = store.getFolder("INBOX");
 
                 emailFolder.open(Folder.READ_WRITE);
+                emailFolder.addMessageCountListener(new MessageCountListener() {
+                    @Override
+                    public void messagesAdded(MessageCountEvent messageCountEvent) {
+                        Message[] messages = messageCountEvent.getMessages();
+                        List<Mail> messageList = new ArrayList<Mail>();
+
+
+                        for (int i = 0; i < messages.length; i++) {
+                            Mail mail = new Mail();
+                            try {
+                                mail.setSubject(messages[i].getSubject());
+                            } catch (MessagingException e) {
+                                e.printStackTrace();
+                            }
+                            messageList.add(mail);
+                        }
+
+                        drawMessages(messageList);
+                    }
+
+                    @Override
+                    public void messagesRemoved(MessageCountEvent messageCountEvent) {
+                        Message[] messages = messageCountEvent.getMessages();
+                        List<Mail> messageList = new ArrayList<Mail>();
+
+
+                        for (int i = 0; i < messages.length; i++) {
+                            Mail mail = new Mail();
+                            try {
+                                mail.setSubject(messages[i].getSubject());
+                            } catch (MessagingException e) {
+                                e.printStackTrace();
+                            }
+                            messageList.add(mail);
+                        }
+                        drawMessages(messageList);
+                    }
+                });
+
                 Message[] messages = emailFolder.getMessages();
                 List<Mail> messageList = new ArrayList<Mail>();
 
 
                 for (int i = 0; i < messages.length; i++) {
                     Mail mail = new Mail();
-                    mail.setSubject(messages[i].getSubject());
+                    try {
+                        mail.setSubject(messages[i].getSubject());
+                    } catch (MessagingException e) {
+                        e.printStackTrace();
+                    }
                     messageList.add(mail);
                 }
+
 
                 emailFolder.close(false);
                 store.close();
