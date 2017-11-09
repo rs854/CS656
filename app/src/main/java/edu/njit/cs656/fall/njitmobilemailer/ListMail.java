@@ -35,27 +35,28 @@ public class ListMail extends AppCompatActivity {
     private ListMail reference;
     private List<Mail> messages;
 
-    private
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_mail);
-
         tableLayout = (TableLayout) findViewById(R.id.list_email_table);
-
 
         reference = this;
         inflater = LayoutInflater.from(this);
 
-        new Updater().execute(new Authentication());
+        tableLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                new Updater().execute(new Authentication());
+            }
+        });
     }
 
     protected void setMessages(List<Mail> messages) {
         this.messages = messages;
     }
 
-    protected void drawMessages(List<Mail> messages) {
+    protected void drawMessages(final List<Mail> messages) {
         tableRows = new TableRow[messages.size()];
         tableParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
         rowParams = new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1);
@@ -64,10 +65,17 @@ public class ListMail extends AppCompatActivity {
             tableRows[i] = new TableRow(this);
             View customView = inflater.inflate(R.layout.data_item, tableRows[i], false);
 
+
+            customView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    System.out.println("Clicked on ");
+                }
+            });
+
             ((TextView) customView.findViewById(R.id.view_subject)).setText(messages.get(i).getSubject());
 
             tableRows[i].addView(customView, rowParams);
-
             tableLayout.addView(tableRows[i], tableParams);
         }
     }
