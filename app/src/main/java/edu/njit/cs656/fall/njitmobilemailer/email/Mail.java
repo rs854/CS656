@@ -6,7 +6,8 @@ package edu.njit.cs656.fall.njitmobilemailer.email;
 
 import org.apache.commons.validator.routines.EmailValidator;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 
 public class Mail { // TODO: I might delete this later on due to javax already having Message class
 
@@ -15,6 +16,19 @@ public class Mail { // TODO: I might delete this later on due to javax already h
     private String subject;
     private List<String> ccClient;
     private String message;
+    private Date date;
+
+    public long getEpoch() {
+        return date.getTime();
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
 
     public String getFromClient() {
 
