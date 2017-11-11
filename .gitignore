@@ -178,3 +178,5 @@ build/android-profile/profile-2017-10-12-21-14-55-811.rawproto
 build/android-profile/profile-2017-10-12-21-14-57-734.rawproto
 build/android-profile/profile-2017-10-12-21-19-09-069.rawproto
 build/intermediates/
+**/*.rawproto
+**/*.json
