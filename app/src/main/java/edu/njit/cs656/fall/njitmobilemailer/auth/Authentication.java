@@ -35,6 +35,7 @@ public class Authentication {
     }
 
     public String getUsername() {
+<<<<<<< HEAD
         return "et24@njit.edu";
         //return System.getProperty("username");
     }
@@ -42,6 +43,15 @@ public class Authentication {
     public String getPassword() {
         return "yeaydlzyelsknvbg";
         //return System.getProperty("password");
+=======
+
+        return System.getProperty("username");
+    }
+
+    public String getPassword() {
+
+        return System.getProperty("password");
+>>>>>>> feature/activity-list-mail
     }
 
     public Properties getPOP3Properties() {
