@@ -1,5 +1,6 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -69,11 +70,13 @@ public class ListMail extends AppCompatActivity {
             View customView = inflater.inflate(R.layout.data_item, tableRows[i], false);
             TextView textView = new TextView(this);
             textView.setHeight(200);
-
+            final int temp = i;
             textView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    System.out.println("Clicked on ");
+                    Intent intent = new Intent(getApplicationContext(), ReadMail.class);
+                    intent.putExtra("subject", messages.get(temp).getSubject());
+                    startActivity(intent);
                 }
             });
             textView.setPadding(10, 5, 10, 5);
