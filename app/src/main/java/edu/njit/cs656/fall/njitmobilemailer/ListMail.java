@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -26,7 +27,7 @@ import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
 
 public class ListMail extends AppCompatActivity {
 
-    public static final String TAG = "ListMailAlternate";
+    public static final String TAG = "ListMail";
     private List<Mail> localMail = new ArrayList<Mail>();
     private List<Mail> remoteMail = new ArrayList<Mail>();
     private LinearLayout linearLayout;
@@ -51,7 +52,7 @@ public class ListMail extends AppCompatActivity {
             textView.setText(remoteMail.get(i).getSubject() + "\n" + "Received on: " + remoteMail.get(i).getDate().toString());
             //textView.setBackgroundColor((i % 2 == 0) ? Color.RED : Color.WHITE);
 
-            // TODO we need to add a dividor instead of alternating colors
+
             linearLayout.addView(textView, 0, listView);
 
         }
@@ -64,6 +65,8 @@ public class ListMail extends AppCompatActivity {
         linearLayout = (LinearLayout) findViewById(R.id.linear_layout_emails);
         LayoutInflater inflater = LayoutInflater.from(this);
         linearLayout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE | LinearLayout.SHOW_DIVIDER_BEGINNING | LinearLayout.SHOW_DIVIDER_END);
+        Window window = this.getWindow();
+        window.setStatusBarColor(Color.RED);
 
         new Thread(new Runnable() {
             @Override
@@ -79,8 +82,6 @@ public class ListMail extends AppCompatActivity {
                         if (!check) check = true;
 
                         if (remoteMail.size() > 0) {
-                            //Collections.sort(localMail, new MailComparator());
-                            //Collections.reverse(localMail);
 
                             // Add drawing step here
                             linearLayout.post(new Runnable() {
