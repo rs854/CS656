@@ -1,12 +1,17 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.mail.Flags;
@@ -18,43 +23,82 @@ import javax.mail.Store;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
-import edu.njit.cs656.fall.njitmobilemailer.email.MailComparator;
 
 public class ListMailAlternate extends AppCompatActivity {
 
     public static final String TAG = "ListMailAlternate";
+    private List<Mail> localMail = new ArrayList<Mail>();
+    private List<Mail> remoteMail = new ArrayList<Mail>();
+    private LinearLayout linearLayout;
+
+    public void reDrawLocalMail() {
+        ListView list = new ListView(this);
+        ListView.LayoutParams listView = new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, ListView.LayoutParams.WRAP_CONTENT);
+
+        localMail.addAll(remoteMail);
+        for (int i = 0; i < remoteMail.size(); i++) {
+            TextView textView = new TextView(this);
+            textView.setHeight(200);
+
+            textView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    System.out.println("Clicked on ");
+                }
+            });
+            textView.setPadding(10, 5, 10, 5);
+            textView.setTextColor(Color.BLACK);
+            textView.setText(remoteMail.get(i).getSubject() + "\n" + "Received on: " + remoteMail.get(i).getDate().toString());
+            //textView.setBackgroundColor((i % 2 == 0) ? Color.RED : Color.WHITE);
+
+            // TODO we need to add a dividor instead of alternating colors
+            linearLayout.addView(textView, 0, listView);
+
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Thread initialDraw = new Thread(new Runnable() {
+        setContentView(R.layout.activity_list_mail);
+        linearLayout = (LinearLayout) findViewById(R.id.linear_layout_emails);
+        LayoutInflater inflater = LayoutInflater.from(this);
+        linearLayout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE | LinearLayout.SHOW_DIVIDER_BEGINNING | LinearLayout.SHOW_DIVIDER_END);
+
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 boolean check = false;
                 while (true) {
                     try {
-                        if (check) {
-                            Log.v(TAG, "CHECKING EVERY 5 seconds now.");
-                            List<Mail> test = getMessages(new Authentication(), check);
-                            if (test != null) for (int i = 0; i < test.size(); i++) {
-                                Log.v(TAG, test.get(i).toString());
-                            }
-                        } else {
-                            List<Mail> test = getMessages(new Authentication(), check);
-                            if (test != null) for (int i = 0; i < test.size(); i++) {
-                                Log.v(TAG, test.get(i).toString());
-                            }
-                            check = true;
+                        remoteMail = getMessages(new Authentication(), check);
+
+                        // The check is to get all initial emails loaded into the structure
+                        // Then it is set to true so that only future unread emails are loaded
+                        // to improve throughput.
+                        if (!check) check = true;
+
+                        if (remoteMail.size() > 0) {
+                            //Collections.sort(localMail, new MailComparator());
+                            //Collections.reverse(localMail);
+
+                            // Add drawing step here
+                            linearLayout.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    reDrawLocalMail();
+                                }
+                            });
                         }
+
                         Thread.sleep(5 * 1000);
                     } catch (InterruptedException e) {
                         Log.v(TAG, e.getMessage());
                     }
                 }
             }
-        });
+        }).start();
 
-        initialDraw.start();
     }
 
     public List<Mail> getMessages(Authentication authentication, boolean checked) {
@@ -71,6 +115,7 @@ public class ListMailAlternate extends AppCompatActivity {
 
                 Mail mail = new Mail();
                 try {
+                    messages[i].setFlag(Flags.Flag.SEEN, true);
                     mail.setSubject(messages[i].getSubject());
                     mail.setMessage(messages[i].getContent().toString());
                     mail.setDate(messages[i].getReceivedDate());
@@ -79,8 +124,6 @@ public class ListMailAlternate extends AppCompatActivity {
                 }
                 messageList.add(mail);
             }
-            Collections.sort(messageList, new MailComparator());
-            Collections.reverse(messageList);
 
             emailFolder.close(true);
             store.close();
