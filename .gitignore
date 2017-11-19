@@ -193,3 +193,5 @@ build/android-profile/profile-2017-10-28-14-06-40-556.json
 build/android-profile/profile-2017-10-28-14-06-40-556.rawproto
 build/android-profile/profile-2017-10-28-14-06-55-656.json
 build/android-profile/profile-2017-10-28-14-06-55-656.rawproto
+*.json
+*.rawproto
