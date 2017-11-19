@@ -96,9 +96,7 @@ public class Mail { // TODO: I might delete this later on due to javax already h
 
     @Override
     public String toString() {
-        return String.format("Subject: %s\r\n"
-                            +"%s\r\n"
-                            +"\r\n.\r\n", this.getSubject(), this.getMessage());
+        return String.format("Subject: %s\nMessage: %s\n", this.getSubject(), this.getMessage().substring(0, this.getMessage().length() > 100 ? 100 : this.getMessage().length() - 1));
     }
 
 }
