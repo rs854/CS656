@@ -30,4 +30,3 @@ Thumbs.db
 build/intermediates/
 *.json
 *.rawproto
-.idea/**
