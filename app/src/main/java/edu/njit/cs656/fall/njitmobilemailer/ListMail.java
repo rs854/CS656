@@ -46,15 +46,13 @@ public class ListMail extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getApplicationContext(), ReadMail.class);
-                    intent.putExtra("subject", messages.get(temp).getSubject());
+                    intent.putExtra("subject", remoteMail.get(temp).getSubject());
                     startActivity(intent);
                 }
             });
             textView.setPadding(10, 5, 10, 5);
             textView.setTextColor(Color.BLACK);
             textView.setText(remoteMail.get(i).getSubject() + "\n" + "Received on: " + remoteMail.get(i).getDate().toString());
-            //textView.setBackgroundColor((i % 2 == 0) ? Color.RED : Color.WHITE);
-
 
             linearLayout.addView(textView, 0, listView);
 
