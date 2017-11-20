@@ -36,12 +36,12 @@ public class Authentication {
 
     public String getUsername() {
 
-        return System.getProperty("username");
+        return "et24@njit.edu";//System.getProperty("username");
     }
 
     public String getPassword() {
 
-        return System.getProperty("password");
+        return "iyhexwmfhipdbhqi";//System.getProperty("password");
     }
 
     public Properties getPOP3Properties() {
