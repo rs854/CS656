@@ -8,12 +8,14 @@ import javax.mail.Authenticator;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 
@@ -41,11 +43,11 @@ public class Send {
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(letter.getToClient()));
 
             message.setSubject(letter.getSubject());
-
+            Multipart mainPart = new MimeMultipart();
             BodyPart messageBody = new MimeBodyPart();
-
             messageBody.setText(letter.getMessage());
-
+            mainPart.addBodyPart(messageBody);
+            message.setContent(mainPart);
             Transport.send(message);
         } catch(MessagingException mex) {
             mex.printStackTrace();

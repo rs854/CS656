@@ -9,6 +9,9 @@ import java.util.Properties;
 public class Authentication {
     // Temporary class to handle password/username retrieval
 
+    private static final String USERNAME = "TEST";
+    private static final String PASSWORD = "TEST";
+
     private Properties smtpProperties;
     private Properties pop3Properties;
     private Properties imapProperties;
@@ -35,23 +38,11 @@ public class Authentication {
     }
 
     public String getUsername() {
-<<<<<<< HEAD
-        return "et24@njit.edu";
-        //return System.getProperty("username");
+        return USERNAME;
     }
 
     public String getPassword() {
-        return "yeaydlzyelsknvbg";
-        //return System.getProperty("password");
-=======
-
-        return System.getProperty("username");
-    }
-
-    public String getPassword() {
-
-        return System.getProperty("password");
->>>>>>> feature/activity-list-mail
+        return PASSWORD;
     }
 
     public Properties getPOP3Properties() {
