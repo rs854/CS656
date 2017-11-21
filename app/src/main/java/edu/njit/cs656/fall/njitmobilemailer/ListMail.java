@@ -25,13 +25,22 @@ import javax.mail.Store;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
+import edu.njit.cs656.fall.njitmobilemailer.interfaces.Listener;
 
 public class ListMail extends AppCompatActivity {
 
     public static final String TAG = "ListMail";
     private List<Mail> localMail = new ArrayList<Mail>();
     private List<Mail> remoteMail = new ArrayList<Mail>();
+    private List<TextView> elementList = new ArrayList<TextView>();
     private LinearLayout linearLayout;
+
+    // callback for setting up indices
+    // instead of using final int
+    public void setUpListener(int index, Listener listener) {
+        listener.setUp(index);
+    }
+
 
     public void reDrawLocalMail() {
         ListView list = new ListView(this);
@@ -39,23 +48,31 @@ public class ListMail extends AppCompatActivity {
 
         localMail.addAll(remoteMail);
         for (int i = 0; i < remoteMail.size(); i++) {
-            TextView textView = new TextView(this);
-            textView.setHeight(200);
-            final int temp = i;
-            textView.setOnClickListener(new View.OnClickListener() {
+            elementList.add(new TextView(this));
+            setUpListener(((localMail.size() - remoteMail.size()) + i), new Listener() {
                 @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(getApplicationContext(), ReadMail.class);
-                    intent.putExtra("subject", remoteMail.get(temp).getSubject());
-                    startActivity(intent);
+                public void setUp(int index) {
+                    // gets the element at the offset
+                    TextView textView = elementList.get(index);
+                    textView.setHeight(200);
+                    textView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(getApplicationContext(), ReadMail.class);
+                            intent.putExtra("subject", localMail.get(index).getSubject());
+                            intent.putExtra("content", localMail.get(index).getMessage()); // TODO change this to content
+                            intent.putExtra("from", localMail.get(index).getFromClient());
+                            startActivity(intent);
+                        }
+                    });
+                    textView.setPadding(10, 5, 10, 5);
+                    textView.setTextColor(Color.BLACK);
+                    textView.setText(localMail.get(index).getSubject().toString() + "\n" + "Received on: " + localMail.get(index).getDate().toString());
+
+                    linearLayout.addView(textView, 0, listView);
+
                 }
             });
-            textView.setPadding(10, 5, 10, 5);
-            textView.setTextColor(Color.BLACK);
-            textView.setText(remoteMail.get(i).getSubject() + "\n" + "Received on: " + remoteMail.get(i).getDate().toString());
-
-            linearLayout.addView(textView, 0, listView);
-
         }
     }
 

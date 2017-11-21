@@ -12,7 +12,10 @@ public class ReadMail extends AppCompatActivity {
         setContentView(R.layout.activity_read_mail);
 
         Bundle extra = getIntent().getExtras();
-        TextView view = (TextView) findViewById(R.id.textView);
-        view.setText(extra.getString("subject"));
+        TextView subject = (TextView) findViewById(R.id.subject);
+        subject.setText(extra.getString("subject"));
+
+        TextView content = (TextView) findViewById(R.id.content);
+        content.setText(extra.getString("content"));
     }
 }
