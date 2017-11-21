@@ -1,26 +1,34 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.text.SimpleDateFormat;
+import javax.mail.Address;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.InternetAddress;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
@@ -32,28 +40,90 @@ public class ListMail extends AppCompatActivity {
     private List<Mail> remoteMail = new ArrayList<Mail>();
     private LinearLayout linearLayout;
 
+    private String abbreviateString(String s, int maxLength){
+        // If string is longer than max length, truncate the string
+        // and add '...'
+        if (s.length() > maxLength){
+            return s.substring(0, Math.min(s.length(), maxLength)) + "...";
+        }
+        else {
+            return s;
+        }
+    }
+
+    @SuppressLint("ResourceType")
     public void reDrawLocalMail() {
         ListView list = new ListView(this);
         ListView.LayoutParams listView = new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, ListView.LayoutParams.WRAP_CONTENT);
+        //list.setDivider(new ColorDrawable());   //0xAARRGGBB
+        //list.setDividerHeight(1);
 
         localMail.addAll(remoteMail);
         for (int i = 0; i < remoteMail.size(); i++) {
-            TextView textView = new TextView(this);
-            textView.setHeight(200);
+            LinearLayout emailTextContainer = new LinearLayout(this);
+            emailTextContainer.setOrientation(LinearLayout.VERTICAL);
 
-            textView.setOnClickListener(new View.OnClickListener() {
+            LinearLayout emailView = new LinearLayout(this);
+            emailView.setOrientation(LinearLayout.HORIZONTAL);
+
+            RelativeLayout emailInnerView = new RelativeLayout(this);
+            RelativeLayout.LayoutParams relativeLayoutParams;
+            relativeLayoutParams = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
+            //relativeLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            //emailInnerView.setHorizontalGravity(7);
+            TextView subjectView = new TextView(this);
+            //subjectView.setHeight(100);
+
+            TextView dateView = new TextView(this);
+            //dateView.setHeight(100);
+
+            TextView fromView = new TextView(this);
+            //fromView.setHeight(100);
+            fromView.setId(1);
+            emailInnerView.addView(fromView, relativeLayoutParams);
+            subjectView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     System.out.println("Clicked on ");
                 }
             });
-            textView.setPadding(10, 5, 10, 5);
-            textView.setTextColor(Color.BLACK);
-            textView.setText(remoteMail.get(i).getSubject() + "\n" + "Received on: " + remoteMail.get(i).getDate().toString());
-            //textView.setBackgroundColor((i % 2 == 0) ? Color.RED : Color.WHITE);
+            subjectView.setPadding(10, 5, 10, 5);
+            //subjectView.setTextColor(Color.BLACK);
+            subjectView.setText(abbreviateString(remoteMail.get(i).getSubject(), 40));
+            fromView.setText(abbreviateString(remoteMail.get(i).getFromPersonal(), 30));
 
+            SimpleDateFormat formatter = new SimpleDateFormat("M/d h:mm a");
+            String s = formatter.format(remoteMail.get(i).getDate());
 
-            linearLayout.addView(textView, 0, listView);
+            relativeLayoutParams = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+            dateView.setText(s);
+            dateView.setGravity(5);
+            dateView.setTextAlignment(1);
+            //fromView.setLayoutParams(param);android
+            fromView.setTextSize(20);
+
+            relativeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, fromView.getId());
+            relativeLayoutParams.addRule(RelativeLayout.ALIGN_TOP, fromView.getId()); // added top alignment rule
+
+            emailInnerView.addView(dateView, relativeLayoutParams);
+
+            //emailInnerView.addView(fromView);
+            //emailInnerView.addView(dateView);
+            emailInnerView.setPadding(10, 5, 10, 5);
+            emailTextContainer.addView(emailInnerView);
+            emailTextContainer.addView(subjectView);
+            emailTextContainer.setPadding(15, 15, 15, 15);
+
+            emailView.setGravity(16); //Center Vertical
+            CheckBox checkBoxView = new CheckBox(this);
+            emailView.addView(checkBoxView);
+            emailView.addView(emailTextContainer);
+            linearLayout.addView(emailView, 0, listView);
 
         }
     }
@@ -120,6 +190,9 @@ public class ListMail extends AppCompatActivity {
                     mail.setSubject(messages[i].getSubject());
                     mail.setMessage(messages[i].getContent().toString());
                     mail.setDate(messages[i].getReceivedDate());
+                    InternetAddress from = (InternetAddress) messages[i].getFrom()[0];
+                    mail.setFromClient(from.getAddress());
+                    mail.setFromPersonal(from.getPersonal());
                 } catch (MessagingException | IOException e) {
                     Log.v(TAG, e.getMessage());
                 }
