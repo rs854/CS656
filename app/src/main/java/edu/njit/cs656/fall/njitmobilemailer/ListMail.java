@@ -1,11 +1,14 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +25,7 @@ import java.util.List;
 
 import java.text.SimpleDateFormat;
 import javax.mail.Address;
+import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -29,6 +33,7 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMultipart;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
@@ -39,6 +44,9 @@ public class ListMail extends AppCompatActivity {
     private List<Mail> localMail = new ArrayList<Mail>();
     private List<Mail> remoteMail = new ArrayList<Mail>();
     private LinearLayout linearLayout;
+    private ListView list;
+    private ListView.LayoutParams listView;
+    private ProgressDialog progress;
 
     private String abbreviateString(String s, int maxLength){
         // If string is longer than max length, truncate the string
@@ -53,10 +61,7 @@ public class ListMail extends AppCompatActivity {
 
     @SuppressLint("ResourceType")
     public void reDrawLocalMail() {
-        ListView list = new ListView(this);
-        ListView.LayoutParams listView = new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, ListView.LayoutParams.WRAP_CONTENT);
-        //list.setDivider(new ColorDrawable());   //0xAARRGGBB
-        //list.setDividerHeight(1);
+        //list = new ListView(this);
 
         localMail.addAll(remoteMail);
         for (int i = 0; i < remoteMail.size(); i++) {
@@ -71,16 +76,9 @@ public class ListMail extends AppCompatActivity {
             relativeLayoutParams = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.WRAP_CONTENT,
                     RelativeLayout.LayoutParams.WRAP_CONTENT);
-            //relativeLayoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-            //emailInnerView.setHorizontalGravity(7);
             TextView subjectView = new TextView(this);
-            //subjectView.setHeight(100);
-
             TextView dateView = new TextView(this);
-            //dateView.setHeight(100);
-
             TextView fromView = new TextView(this);
-            //fromView.setHeight(100);
             fromView.setId(1);
             emailInnerView.addView(fromView, relativeLayoutParams);
             subjectView.setOnClickListener(new View.OnClickListener() {
@@ -90,7 +88,7 @@ public class ListMail extends AppCompatActivity {
                 }
             });
             subjectView.setPadding(10, 5, 10, 5);
-            //subjectView.setTextColor(Color.BLACK);
+            subjectView.setTextSize(14);
             subjectView.setText(abbreviateString(remoteMail.get(i).getSubject(), 40));
             fromView.setText(abbreviateString(remoteMail.get(i).getFromPersonal(), 30));
 
@@ -104,16 +102,12 @@ public class ListMail extends AppCompatActivity {
             dateView.setText(s);
             dateView.setGravity(5);
             dateView.setTextAlignment(1);
-            //fromView.setLayoutParams(param);android
             fromView.setTextSize(20);
 
             relativeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, fromView.getId());
             relativeLayoutParams.addRule(RelativeLayout.ALIGN_TOP, fromView.getId()); // added top alignment rule
 
             emailInnerView.addView(dateView, relativeLayoutParams);
-
-            //emailInnerView.addView(fromView);
-            //emailInnerView.addView(dateView);
             emailInnerView.setPadding(10, 5, 10, 5);
             emailTextContainer.addView(emailInnerView);
             emailTextContainer.addView(subjectView);
@@ -123,6 +117,7 @@ public class ListMail extends AppCompatActivity {
             CheckBox checkBoxView = new CheckBox(this);
             emailView.addView(checkBoxView);
             emailView.addView(emailTextContainer);
+            emailView.setPadding(10, 10, 10, 10);
             linearLayout.addView(emailView, 0, listView);
 
         }
@@ -132,11 +127,23 @@ public class ListMail extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_mail);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        myToolbar.setTitle("NJIT Mail");
+        setSupportActionBar(myToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
         linearLayout = (LinearLayout) findViewById(R.id.linear_layout_emails);
         LayoutInflater inflater = LayoutInflater.from(this);
         linearLayout.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE | LinearLayout.SHOW_DIVIDER_BEGINNING | LinearLayout.SHOW_DIVIDER_END);
         Window window = this.getWindow();
-        window.setStatusBarColor(Color.RED);
+        window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+        list = new ListView(this);
+        listView = new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, ListView.LayoutParams.WRAP_CONTENT);
+        progress = new ProgressDialog(this);
+//        progress.setTitle("Loading");
+        progress.setMessage("Loading emails...");
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        progress.show();
 
         new Thread(new Runnable() {
             @Override
@@ -158,6 +165,7 @@ public class ListMail extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     reDrawLocalMail();
+                                    progress.dismiss();
                                 }
                             });
                         }
@@ -208,5 +216,6 @@ public class ListMail extends AppCompatActivity {
             return null;
         }
     }
+
 
 }
