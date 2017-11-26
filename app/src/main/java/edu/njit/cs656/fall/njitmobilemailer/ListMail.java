@@ -12,16 +12,20 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import org.jsoup.Jsoup;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.internet.MimeMultipart;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
@@ -136,7 +140,29 @@ public class ListMail extends AppCompatActivity {
                 try {
                     messages[i].setFlag(Flags.Flag.SEEN, true);
                     mail.setSubject(messages[i].getSubject());
-                    mail.setMessage(messages[i].getContent().toString());
+
+                    // need to check what type of content we have
+                    if (messages[i].isMimeType("text/plain")) {
+                        mail.setMessage(messages[i].getContent().toString());
+                    } else if (messages[i].isMimeType("multipart/*")) {
+
+                        // extract the mime-multipart content
+                        MimeMultipart mimeContent = (MimeMultipart) messages[i].getContent();
+                        StringBuilder tmp = new StringBuilder();
+                        for (int k = 0; k < mimeContent.getCount(); k++) {
+                            BodyPart bodyContent = mimeContent.getBodyPart(k);
+                            if (bodyContent.isMimeType("text/plain")) {
+                                tmp.append(bodyContent.getContent().toString());
+                                break;
+                            } else if (bodyContent.isMimeType("text/html")) {
+                                tmp.append(Jsoup.parse(bodyContent.getContent().toString()).text());
+                            }
+                        }
+                        mail.setMessage(tmp.toString());
+                    } else {
+                        mail.setMessage("NULL");
+                    }
+
                     mail.setDate(messages[i].getReceivedDate());
                 } catch (MessagingException | IOException e) {
                     Log.v(TAG, e.getMessage());
