@@ -144,6 +144,7 @@ public class ListMail extends AppCompatActivity {
                     mail.setSubject(messages[i].getSubject());
 
                     // need to check what type of content we have
+                    // TODO potentially this can be refactored to a recursive function.
                     if (messages[i].isMimeType("text/plain") || messages[i].isMimeType("text/html")) {
                         mail.setMessage(messages[i].getContent().toString());
                     } else if (messages[i].isMimeType("multipart/*")) {
