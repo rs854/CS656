@@ -114,6 +114,8 @@ public class ListMail extends AppCompatActivity {
                             });
                         }
 
+                        // Thread sleep time of 5 seconds
+                        // TODO we should change this to a more appropriate number for production
                         Thread.sleep(5 * 1000);
                     } catch (InterruptedException e) {
                         Log.v(TAG, e.getMessage());
@@ -142,7 +144,7 @@ public class ListMail extends AppCompatActivity {
                     mail.setSubject(messages[i].getSubject());
 
                     // need to check what type of content we have
-                    if (messages[i].isMimeType("text/plain")) {
+                    if (messages[i].isMimeType("text/plain") || messages[i].isMimeType("text/html")) {
                         mail.setMessage(messages[i].getContent().toString());
                     } else if (messages[i].isMimeType("multipart/*")) {
 
@@ -160,6 +162,7 @@ public class ListMail extends AppCompatActivity {
                         }
                         mail.setMessage(tmp.toString());
                     } else {
+                        Log.v(TAG, "Message(" + i + ") is a type: " + messages[i].getContentType());
                         mail.setMessage("NULL");
                     }
 
