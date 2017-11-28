@@ -2,6 +2,7 @@ package edu.njit.cs656.fall.njitmobilemailer;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -11,6 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.CheckBox;
@@ -90,7 +93,7 @@ public class ListMail extends AppCompatActivity {
             subjectView.setPadding(10, 5, 10, 5);
             subjectView.setTextSize(14);
             subjectView.setText(abbreviateString(remoteMail.get(i).getSubject(), 40));
-            fromView.setText(abbreviateString(remoteMail.get(i).getFromPersonal(), 30));
+            fromView.setText(abbreviateString(remoteMail.get(i).getFromPersonal(), 20));
 
             SimpleDateFormat formatter = new SimpleDateFormat("M/d h:mm a");
             String s = formatter.format(remoteMail.get(i).getDate());
@@ -121,6 +124,29 @@ public class ListMail extends AppCompatActivity {
             linearLayout.addView(emailView, 0, listView);
 
         }
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.list_mail_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // action with ID action_refresh was selected
+            case R.id.action_compose:
+                Intent intent = new Intent(getApplicationContext(), SendMail.class);
+                startActivity(intent);
+                break;
+            default:
+                break;
+        }
+
+        return true;
     }
 
     @Override

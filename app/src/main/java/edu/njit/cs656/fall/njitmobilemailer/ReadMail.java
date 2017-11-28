@@ -36,6 +36,9 @@ public class ReadMail extends AppCompatActivity {
             case R.id.action_delete:
                 // TODO: Add code to delete the email here
                 break;
+            case android.R.id.home:
+                onBackPressed();
+                break;
             default:
                 break;
         }
