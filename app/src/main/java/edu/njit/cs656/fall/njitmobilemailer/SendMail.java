@@ -12,12 +12,12 @@ public class SendMail extends AppCompatActivity {
 
 
     private String getTo() {
-        EditText item = (EditText) findViewById(R.id.editText2);
+        EditText item = (EditText) findViewById(R.id.to_editText);
         return item.getText().toString();
     }
 
     private String getBody() {
-        EditText item = (EditText) findViewById(R.id.editText3);
+        EditText item = (EditText) findViewById(R.id.body_editText);
         return item.getText().toString();
     }
 
@@ -36,10 +36,10 @@ public class SendMail extends AppCompatActivity {
 
                         Mail letter = new Mail();
                         letter.setSubject("TEST SUBJECT");
-                        letter.setMessage(((EditText) findViewById(R.id.editText3)).getText().toString());
+                        letter.setMessage(((EditText) findViewById(R.id.body_editText)).getText().toString());
                         try {
                             letter.setFromClient("et24@njit.edu");
-                            letter.setToClient(((EditText) findViewById(R.id.editText2)).getText().toString());
+                            letter.setToClient(((EditText) findViewById(R.id.to_editText)).getText().toString());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

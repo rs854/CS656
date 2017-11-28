@@ -47,16 +47,20 @@
 
     <EditText
         android:id="@+id/body_editText"
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="0dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:ems="10"
         android:gravity="top"
         android:hint="Compose"
         android:inputType="textMultiLine"
         android:padding="5dp"
         android:singleLine="false"
+        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/subject_editText"
-        app:layout_constraintBottom_toTopOf="@+id/button"/>
+        android:layout_height="0dp" />
 
     <Button
         android:id="@+id/button"
