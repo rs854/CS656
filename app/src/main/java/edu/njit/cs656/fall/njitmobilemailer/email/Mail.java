@@ -12,6 +12,7 @@ import java.util.List;
 public class Mail { // TODO: I might delete this later on due to javax already having Message class
 
     private String fromClient;
+    private String fromPersonal;
     private String toClient;
     private String subject;
     private List<String> ccClient;
@@ -28,6 +29,14 @@ public class Mail { // TODO: I might delete this later on due to javax already h
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getFromPersonal() {
+        return fromPersonal;
+    }
+
+    public void setFromPersonal(String fromPersonal) {
+        this.fromPersonal = fromPersonal;
     }
 
     public String getFromClient() {
