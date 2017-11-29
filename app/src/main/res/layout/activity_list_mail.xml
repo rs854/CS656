@@ -5,6 +5,15 @@
     android:layout_height="match_parent"
     tools:context="edu.njit.cs656.fall.njitmobilemailer.ListMail">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        />
+
     <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -13,8 +22,8 @@
                 android:id="@+id/linear_layout_emails"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:divider="#FF0000"
-                android:dividerHeight="5dp"
+                android:divider="@color/colorAccent"
+                android:dividerHeight="10dp"
                 android:orientation="vertical" />
 
         </ScrollView>
