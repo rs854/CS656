@@ -22,12 +22,10 @@ import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 
 public class Send {
 
-    private static final String host = "smtp.gmail.com";
-
     public static void Email(Mail letter) {
         final Authentication authentication = new Authentication();
 
-        Session session = Session.getDefaultInstance(authentication.getSMTPProperties(),
+        Session session = Session.getInstance(authentication.getSMTPProperties(),
                 new Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
