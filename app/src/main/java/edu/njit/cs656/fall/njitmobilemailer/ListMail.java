@@ -96,7 +96,6 @@ public class ListMail extends AppCompatActivity {
             fromView.setId(1);
             emailInnerView.addView(fromView, relativeLayoutParams);
 
-            // TODO set up Listener here
             setUpListener(((localMail.size() - remoteMail.size()) + i), new Listener() {
                 @Override
                 public void setUp(int index) {
@@ -104,6 +103,8 @@ public class ListMail extends AppCompatActivity {
                         @Override
                         public void onClick(View view) {
                             Intent intent = new Intent(getApplicationContext(), ReadMail.class);
+                            intent.putExtra("index", localMail.get(index).getIndex());
+                            intent.putExtra("hash", localMail.get(index).getContentHash());
                             intent.putExtra("subject", localMail.get(index).getSubject());
                             intent.putExtra("content", localMail.get(index).getMessage());
                             intent.putExtra("from", localMail.get(index).getFromClient());
