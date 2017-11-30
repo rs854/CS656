@@ -1,10 +1,15 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.WebView;
+import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ReadMail extends AppCompatActivity {
 
@@ -27,12 +32,31 @@ public class ReadMail extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        Bundle extra = getIntent().getExtras();
+
+        TextView subject = (TextView) findViewById(R.id.subject_textView);
+        subject.setText(extra.getString("subject"));
+
+        TextView from = (TextView) findViewById(R.id.from_textView);
+        from.setText(extra.getString("from"));
+
+        TextView dateTextView = (TextView) findViewById(R.id.datetime_textView);
+        // Convert date from Long > Date > String
+        Date date = new Date();
+        date.setTime(extra.getLong("date", -1));
+        SimpleDateFormat formatter = new SimpleDateFormat("M/d h:mm a");
+        String dateString = formatter.format(date);
+        dateTextView.setText(dateString);
+
+        WebView content = (WebView) findViewById(R.id.content_webView);
+        content.loadData(extra.getString("content"), "text/html; charset=utf-8", "UTF-8");
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            // action with ID action_refresh was selected
             case R.id.action_delete:
                 // TODO: Add code to delete the email here
                 break;

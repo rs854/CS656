@@ -19,6 +19,26 @@ public class Mail { // TODO: I might delete this later on due to javax already h
     private String message;
     private Date date;
 
+    private int index;
+    private String contentHash;
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+
+    public String getContentHash() {
+        return contentHash;
+    }
+
+    public void setContentHash(String contentHash) {
+        this.contentHash = contentHash;
+    }
+
     public long getEpoch() {
         return date.getTime();
     }

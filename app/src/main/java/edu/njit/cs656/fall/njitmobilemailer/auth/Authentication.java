@@ -38,12 +38,10 @@ public class Authentication {
     }
 
     public String getUsername() {
-
         return USERNAME;
     }
 
     public String getPassword() {
-
         return PASSWORD;
     }
 
