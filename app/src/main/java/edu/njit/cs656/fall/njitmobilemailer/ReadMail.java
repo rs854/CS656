@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 public class ReadMail extends AppCompatActivity {
 
@@ -29,17 +30,21 @@ public class ReadMail extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         Bundle extra = getIntent().getExtras();
-        //TODO TextView subject = (TextView) findViewById(R.id.subject);
-        //subject.setText(extra.getString("subject"));
 
-        //TODO TextView content = (TextView) findViewById(R.id.content);
-        //content.setText(extra.getString("content"));
+        TextView subject = (TextView) findViewById(R.id.subject_textView);
+        subject.setText(extra.getString("subject"));
+
+        TextView from = (TextView) findViewById(R.id.from_textView);
+        from.setText(extra.getString("from"));
+
+        TextView content = (TextView) findViewById(R.id.body_textView);
+        content.setText(extra.getString("content"));
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            // action with ID action_refresh was selected
             case R.id.action_delete:
                 // TODO: Add code to delete the email here
                 break;
