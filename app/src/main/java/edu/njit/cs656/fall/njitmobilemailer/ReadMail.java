@@ -5,7 +5,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.WebView;
 import android.widget.TextView;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ReadMail extends AppCompatActivity {
 
@@ -37,8 +41,16 @@ public class ReadMail extends AppCompatActivity {
         TextView from = (TextView) findViewById(R.id.from_textView);
         from.setText(extra.getString("from"));
 
-        TextView content = (TextView) findViewById(R.id.body_textView);
-        content.setText(extra.getString("content"));
+        TextView dateTextView = (TextView) findViewById(R.id.datetime_textView);
+        // Convert date from Long > Date > String
+        Date date = new Date();
+        date.setTime(extra.getLong("date", -1));
+        SimpleDateFormat formatter = new SimpleDateFormat("M/d h:mm a");
+        String dateString = formatter.format(date);
+        dateTextView.setText(dateString);
+
+        WebView content = (WebView) findViewById(R.id.content_webView);
+        content.loadData(extra.getString("content"), "text/html; charset=utf-8", "UTF-8");
 
     }
 

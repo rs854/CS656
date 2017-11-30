@@ -107,6 +107,7 @@ public class ListMail extends AppCompatActivity {
                             intent.putExtra("subject", localMail.get(index).getSubject());
                             intent.putExtra("content", localMail.get(index).getMessage());
                             intent.putExtra("from", localMail.get(index).getFromClient());
+                            intent.putExtra("date", localMail.get(index).getDate().getTime());
                             startActivity(intent);
                         }
                     });
