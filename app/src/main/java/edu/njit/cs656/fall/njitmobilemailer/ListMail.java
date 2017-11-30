@@ -3,9 +3,6 @@ package edu.njit.cs656.fall.njitmobilemailer;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -25,11 +22,10 @@ import android.widget.TextView;
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.text.SimpleDateFormat;
-import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -58,12 +54,20 @@ public class ListMail extends AppCompatActivity {
     private String abbreviateString(String s, int maxLength){
         // If string is longer than max length, truncate the string
         // and add '...'
+        if (s == null) return null;
+
         if (s.length() > maxLength){
             return s.substring(0, Math.min(s.length(), maxLength)) + "...";
         }
         else {
             return s;
         }
+    }
+
+    // callback for setting up indices
+    // instead of using final int
+    public void setUpListener(int index, Listener listener) {
+        listener.setUp(index);
     }
 
     @SuppressLint("ResourceType")
@@ -88,12 +92,25 @@ public class ListMail extends AppCompatActivity {
             TextView fromView = new TextView(this);
             fromView.setId(1);
             emailInnerView.addView(fromView, relativeLayoutParams);
-            subjectView.setOnClickListener(new View.OnClickListener() {
+
+            // TODO set up Listener here
+            setUpListener(((localMail.size() - remoteMail.size()) + i), new Listener() {
                 @Override
-                public void onClick(View view) {
-                    System.out.println("Clicked on ");
+                public void setUp(int index) {
+                    emailTextContainer.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(getApplicationContext(), ReadMail.class);
+                            intent.putExtra("subject", localMail.get(index).getSubject());
+                            intent.putExtra("content", localMail.get(index).getMessage());
+                            intent.putExtra("from", localMail.get(index).getFromClient());
+                            startActivity(intent);
+                        }
+                    });
                 }
             });
+
+
             subjectView.setPadding(10, 5, 10, 5);
             subjectView.setTextSize(14);
             subjectView.setText(abbreviateString(remoteMail.get(i).getSubject(), 40));

@@ -1,14 +1,10 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
 import android.os.Bundle;
-<<<<<<< HEAD
 import android.support.v7.app.AppCompatActivity;
-import android.widget.TextView;
-=======
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
->>>>>>> development
 
 public class ReadMail extends AppCompatActivity {
 
@@ -31,6 +27,13 @@ public class ReadMail extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        Bundle extra = getIntent().getExtras();
+        //TODO TextView subject = (TextView) findViewById(R.id.subject);
+        //subject.setText(extra.getString("subject"));
+
+        //TODO TextView content = (TextView) findViewById(R.id.content);
+        //content.setText(extra.getString("content"));
     }
 
     @Override
