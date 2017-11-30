@@ -19,9 +19,12 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.common.hash.Hashing;
+
 import org.jsoup.Jsoup;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -270,6 +273,8 @@ public class ListMail extends AppCompatActivity {
                         mail.setMessage("NULL");
                     }
 
+                    mail.setIndex(messages[i].getMessageNumber());
+                    mail.setContentHash(Hashing.sha256().hashString(mail.getMessage(), Charset.defaultCharset()).toString());
                     mail.setDate(messages[i].getReceivedDate());
                     InternetAddress from = (InternetAddress) messages[i].getFrom()[0];
                     mail.setFromClient(from.getAddress());
