@@ -9,8 +9,8 @@ import java.util.Properties;
 public class Authentication {
     // Temporary class to handle password/username retrieval
 
-    private static final String USERNAME = "TEST";
-    private static final String PASSWORD = "TEST";
+    private static final String USERNAME = "rsmith8917@gmail.com";
+    private static final String PASSWORD = "m^aK%8Qhn5B6CV%^pg";
 
     private Properties smtpProperties;
     private Properties pop3Properties;
