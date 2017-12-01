@@ -116,17 +116,24 @@ public class ReadMail extends AppCompatActivity {
 
                         // extract the mime-multipart content
                         MimeMultipart mimeContent = (MimeMultipart) foundMessages[0].getContent();
-                        StringBuilder tmp = new StringBuilder();
+                        StringBuilder htmlTmp = new StringBuilder();
+                        StringBuilder textTmp = new StringBuilder();
+                        boolean isHTML = false;
                         for (int k = 0; k < mimeContent.getCount(); k++) {
                             BodyPart bodyContent = mimeContent.getBodyPart(k);
                             if (bodyContent.isMimeType("text/plain")) {
-                                tmp.append(bodyContent.getContent().toString().replaceAll("\r\n", "<br>"));
-                                break;
+                                textTmp.append(bodyContent.getContent().toString().replaceAll("\r\n", "<br>"));
                             } else if (bodyContent.isMimeType("text/html")) {
-                                tmp.append(Jsoup.parse(bodyContent.getContent().toString()).text());
+                                isHTML = true;
+                                htmlTmp.append(bodyContent.getContent().toString());
                             }
                         }
-                        contentString = tmp.toString();
+                        if (isHTML){
+                            contentString = htmlTmp.toString();
+                        } else {
+                            contentString = textTmp.toString();
+                        }
+
                     } else {
                         Log.v(TAG, "Message is a type: " + foundMessages[0].getContentType());
                         contentString = "NULL";
