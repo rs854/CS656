@@ -1,20 +1,39 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import org.jsoup.Jsoup;
+
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import javax.mail.BodyPart;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.search.SearchTerm;
+
+import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
+import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
 
 public class ReadMail extends AppCompatActivity {
 
     private Toolbar toolbar;
-
+    public static final String TAG = "ReadMail";
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -36,10 +55,14 @@ public class ReadMail extends AppCompatActivity {
         Bundle extra = getIntent().getExtras();
 
         TextView subject = (TextView) findViewById(R.id.subject_textView);
-        subject.setText(extra.getString("subject"));
+        String subjectString = extra.getString("subject");
+        subject.setText(subjectString);
 
         TextView from = (TextView) findViewById(R.id.from_textView);
-        from.setText(extra.getString("from"));
+        String fromString = extra.getString("from");
+        from.setText(fromString);
+
+
 
         TextView dateTextView = (TextView) findViewById(R.id.datetime_textView);
         // Convert date from Long > Date > String
@@ -49,9 +72,82 @@ public class ReadMail extends AppCompatActivity {
         String dateString = formatter.format(date);
         dateTextView.setText(dateString);
 
-        WebView content = (WebView) findViewById(R.id.content_webView);
-        content.loadData(extra.getString("content"), "text/html; charset=utf-8", "UTF-8");
+        ProgressDialog progress = new ProgressDialog(this);
+        progress.setMessage("Loading email...");
+        progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+        progress.show();
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String contentString = "";
+                try {
+
+                    Authentication authentication = new Authentication();
+                    Session emailSession = Session.getDefaultInstance(authentication.getIMAPProperties());
+                    Store store = emailSession.getStore("imaps");
+                    store.connect("imap.gmail.com", authentication.getUsername(), authentication.getPassword());
+                    Folder emailFolder = store.getFolder("INBOX");
+                    emailFolder.open(Folder.READ_WRITE);
+                    Message messages[] = emailFolder.getMessages();
+
+                    SearchTerm term = new SearchTerm() {
+                        public boolean match(Message message) {
+                            try {
+                                InternetAddress from = (InternetAddress) message.getFrom()[0];
+                                if (message.getSubject().compareTo(subjectString) == 0 && from.getPersonal().compareTo(fromString) == 0 && message.getReceivedDate().compareTo(date) == 0) {
+                                    return true;
+                                }
+                            } catch (MessagingException e) {
+                                e.printStackTrace();
+                            }
+                            return false;
+                        }
+                    };
+
+                    Message[] foundMessages = emailFolder.search(term);
+
+
+                    if (foundMessages[0].isMimeType("text/plain")){
+                        contentString = foundMessages[0].getContent().toString().replaceAll("\r\n", "<br>");
+                    } else if (foundMessages[0].isMimeType("text/html")) {
+                        contentString = foundMessages[0].getContent().toString();
+                    } else if (foundMessages[0].isMimeType("multipart/*")) {
+
+                        // extract the mime-multipart content
+                        MimeMultipart mimeContent = (MimeMultipart) foundMessages[0].getContent();
+                        StringBuilder tmp = new StringBuilder();
+                        for (int k = 0; k < mimeContent.getCount(); k++) {
+                            BodyPart bodyContent = mimeContent.getBodyPart(k);
+                            if (bodyContent.isMimeType("text/plain")) {
+                                tmp.append(bodyContent.getContent().toString().replaceAll("\r\n", "<br>"));
+                                break;
+                            } else if (bodyContent.isMimeType("text/html")) {
+                                tmp.append(Jsoup.parse(bodyContent.getContent().toString()).text());
+                            }
+                        }
+                        contentString = tmp.toString();
+                    } else {
+                        Log.v(TAG, "Message is a type: " + foundMessages[0].getContentType());
+                        contentString = "NULL";
+                    }
+                    emailFolder.close(true);
+                    store.close();
+
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+
+                final String finalContent = contentString;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        WebView content = (WebView) findViewById(R.id.content_webView);
+                        content.loadData(finalContent,"text/html; charset=utf-8","UTF-8");
+                        progress.dismiss();
+                    }
+                });
+            }}).start();
     }
 
     @Override
