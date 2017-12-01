@@ -46,8 +46,8 @@ import edu.njit.cs656.fall.njitmobilemailer.interfaces.Listener;
 public class ListMail extends AppCompatActivity {
 
     public static final String TAG = "ListMail";
-    private List<Mail> localMail = new ArrayList<Mail>();
     private List<Mail> remoteMail = new ArrayList<Mail>();
+    private List<Mail> localMail = new ArrayList<Mail>();
     private List<TextView> elementList = new ArrayList<TextView>();
     private LinearLayout linearLayout;
     private ListView list;
@@ -77,7 +77,7 @@ public class ListMail extends AppCompatActivity {
     public void reDrawLocalMail() {
         //list = new ListView(this);
 
-        localMail.addAll(remoteMail);
+	localMail.addAll(remoteMail);
         for (int i = 0; i < remoteMail.size(); i++) {
             LinearLayout emailTextContainer = new LinearLayout(this);
             emailTextContainer.setOrientation(LinearLayout.VERTICAL);
@@ -106,8 +106,7 @@ public class ListMail extends AppCompatActivity {
                             intent.putExtra("index", localMail.get(index).getIndex());
                             intent.putExtra("hash", localMail.get(index).getContentHash());
                             intent.putExtra("subject", localMail.get(index).getSubject());
-                            intent.putExtra("content", localMail.get(index).getMessage());
-                            intent.putExtra("from", localMail.get(index).getFromClient());
+                            intent.putExtra("from", localMail.get(index).getFromPersonal());
                             intent.putExtra("date", localMail.get(index).getDate().getTime());
                             startActivity(intent);
                         }
@@ -192,7 +191,6 @@ public class ListMail extends AppCompatActivity {
         list = new ListView(this);
         listView = new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, ListView.LayoutParams.WRAP_CONTENT);
         progress = new ProgressDialog(this);
-//        progress.setTitle("Loading");
         progress.setMessage("Loading emails...");
         progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
         progress.show();
@@ -210,7 +208,16 @@ public class ListMail extends AppCompatActivity {
                         // to improve throughput.
                         if (!check) check = true;
 
-                        if (remoteMail.size() > 0) {
+                        // This prevents app from crashing if the inbox is empty
+                        int size = 0;
+                        try{
+                            size = remoteMail.size();
+                        }
+                        catch (Exception e){
+
+                        }
+
+                        if (size > 0) {
 
                             // Add drawing step here
                             linearLayout.post(new Runnable() {
@@ -242,41 +249,42 @@ public class ListMail extends AppCompatActivity {
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_WRITE);
             Message messages[] = emailFolder.getMessages();
-            List<Mail> messageList = new ArrayList<Mail>();
+            List<Mail> messageList = new ArrayList<>();
             for (int i = 0; i < messages.length; i++) {
                 if (checked && messages[i].isSet(Flags.Flag.SEEN)) continue;
+//                if (checked) continue;
 
                 Mail mail = new Mail();
                 try {
                     messages[i].setFlag(Flags.Flag.SEEN, true);
                     mail.setSubject(messages[i].getSubject());
 
-                    // need to check what type of content we have
-                    // TODO potentially this can be refactored to a recursive function.
-                    if (messages[i].isMimeType("text/plain") || messages[i].isMimeType("text/html")) {
-                        mail.setMessage(messages[i].getContent().toString());
-                    } else if (messages[i].isMimeType("multipart/*")) {
-
-                        // extract the mime-multipart content
-                        MimeMultipart mimeContent = (MimeMultipart) messages[i].getContent();
-                        StringBuilder tmp = new StringBuilder();
-                        for (int k = 0; k < mimeContent.getCount(); k++) {
-                            BodyPart bodyContent = mimeContent.getBodyPart(k);
-                            if (bodyContent.isMimeType("text/plain")) {
-                                tmp.append(bodyContent.getContent().toString());
-                                break;
-                            } else if (bodyContent.isMimeType("text/html")) {
-                                tmp.append(Jsoup.parse(bodyContent.getContent().toString()).text());
-                            }
-                        }
-                        mail.setMessage(tmp.toString());
-                    } else {
-                        Log.v(TAG, "Message(" + i + ") is a type: " + messages[i].getContentType());
-                        mail.setMessage("NULL");
-                    }
+//                    // need to check what type of content we have
+//                    // TODO potentially this can be refactored to a recursive function.
+//                    if (messages[i].isMimeType("text/plain") || messages[i].isMimeType("text/html")) {
+//                        mail.setMessage(messages[i].getContent().toString());
+//                    } else if (messages[i].isMimeType("multipart/*")) {
+//
+//                        // extract the mime-multipart content
+//                        MimeMultipart mimeContent = (MimeMultipart) messages[i].getContent();
+//                        StringBuilder tmp = new StringBuilder();
+//                        for (int k = 0; k < mimeContent.getCount(); k++) {
+//                            BodyPart bodyContent = mimeContent.getBodyPart(k);
+//                            if (bodyContent.isMimeType("text/plain")) {
+//                                tmp.append(bodyContent.getContent().toString());
+//                                break;
+//                            } else if (bodyContent.isMimeType("text/html")) {
+//                                tmp.append(Jsoup.parse(bodyContent.getContent().toString()).text());
+//                            }
+//                        }
+//                        mail.setMessage(tmp.toString());
+//                    } else {
+//                        Log.v(TAG, "Message(" + i + ") is a type: " + messages[i].getContentType());
+//                        mail.setMessage("NULL");
+//                    }
 
                     mail.setIndex(messages[i].getMessageNumber());
-                    mail.setContentHash(Hashing.sha256().hashString(mail.getMessage(), Charset.defaultCharset()).toString());
+//                    mail.setContentHash(Hashing.sha256().hashString(mail.getMessage(), Charset.defaultCharset()).toString());
                     mail.setDate(messages[i].getReceivedDate());
                     InternetAddress from = (InternetAddress) messages[i].getFrom()[0];
                     mail.setFromClient(from.getAddress());
