@@ -10,12 +10,8 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import org.jsoup.Jsoup;
-
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.mail.BodyPart;
 import javax.mail.Folder;
@@ -28,12 +24,11 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.search.SearchTerm;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
-import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
 
 public class ReadMail extends AppCompatActivity {
 
-    private Toolbar toolbar;
     public static final String TAG = "ReadMail";
+    private Toolbar toolbar;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -86,7 +81,7 @@ public class ReadMail extends AppCompatActivity {
                     Authentication authentication = new Authentication();
                     Session emailSession = Session.getDefaultInstance(authentication.getIMAPProperties());
                     Store store = emailSession.getStore("imaps");
-                    store.connect("imap.gmail.com", authentication.getUsername(), authentication.getPassword());
+                    store.connect("imap.gmail.com", authentication.getUsername(getBaseContext()), authentication.getPassword(getBaseContext()));
                     Folder emailFolder = store.getFolder("INBOX");
                     emailFolder.open(Folder.READ_WRITE);
                     Message messages[] = emailFolder.getMessages();

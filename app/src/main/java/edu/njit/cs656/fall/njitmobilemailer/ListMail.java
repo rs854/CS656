@@ -19,17 +19,11 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.common.hash.Hashing;
-
-import org.jsoup.Jsoup;
-
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -37,7 +31,6 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMultipart;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
@@ -244,7 +237,7 @@ public class ListMail extends AppCompatActivity {
         try {
             Session emailSession = Session.getDefaultInstance(authentication.getIMAPProperties());
             Store store = emailSession.getStore("imaps");
-            store.connect("imap.gmail.com", authentication.getUsername(), authentication.getPassword());
+            store.connect("imap.gmail.com", authentication.getUsername(getBaseContext()), authentication.getPassword(getBaseContext()));
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_WRITE);
             Message messages[] = emailFolder.getMessages();

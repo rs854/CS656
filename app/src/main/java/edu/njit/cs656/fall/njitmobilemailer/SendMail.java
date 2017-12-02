@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
 
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
@@ -70,7 +69,7 @@ public class SendMail extends AppCompatActivity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        Send.Email(letter);
+                        Send.Email(letter, getBaseContext());
                     }
                 }).start();
                 break;
