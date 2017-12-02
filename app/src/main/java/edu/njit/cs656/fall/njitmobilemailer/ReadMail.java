@@ -1,6 +1,7 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -32,7 +33,7 @@ public class ReadMail extends AppCompatActivity {
 
     private Toolbar toolbar;
     private int mailIndex;
-    private String mailHash;
+    private int mailId;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -61,8 +62,8 @@ public class ReadMail extends AppCompatActivity {
         String fromString = extra.getString("from");
         from.setText(fromString);
 
-        mailIndex = extra.getInt("id");
-        //mailHash = extra.getString("hash");
+        mailIndex = extra.getInt("index");
+        mailId = extra.getInt("id");
 
         TextView dateTextView = (TextView) findViewById(R.id.datetime_textView);
         // Convert date from Long > Date > String
@@ -107,6 +108,12 @@ public class ReadMail extends AppCompatActivity {
 
                     Message[] foundMessages = emailFolder.search(term);
 
+                    if (foundMessages == null) {
+                        emailFolder.close(true);
+                        store.close();
+                        setResult(-1);
+                        finish();
+                    }
 
                     if (foundMessages[0].isMimeType("text/plain")){
                         contentString = foundMessages[0].getContent().toString().replaceAll("\r\n", "<br>");
@@ -179,6 +186,7 @@ public class ReadMail extends AppCompatActivity {
                                     Folder emailFolder = store.getFolder("INBOX");
                                     emailFolder.open(Folder.READ_WRITE);
                                     emailFolder.getMessage(mailIndex).setFlag(Flags.Flag.DELETED, true);
+                                    emailFolder.expunge();
                                     emailFolder.close(true);
                                     store.close();
 
@@ -198,7 +206,9 @@ public class ReadMail extends AppCompatActivity {
                     }
                 }).start();
 
-                setResult(mailIndex, getIntent());
+                Intent intent = new Intent();
+                intent.putExtra("index", mailId);
+                setResult(1, intent);
                 finish();
                 break;
             case android.R.id.home:

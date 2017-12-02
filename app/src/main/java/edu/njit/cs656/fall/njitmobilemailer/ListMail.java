@@ -1,7 +1,6 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -47,7 +46,6 @@ public class ListMail extends AppCompatActivity {
     private ListView list;
     private ListView.LayoutParams listView;
     private ProgressDialog progress;
-    private int localMailIndex;
 
 
     private String abbreviateString(String s, int maxLength){
@@ -70,7 +68,7 @@ public class ListMail extends AppCompatActivity {
     }
 
     public void DrawLocalMail() {
-        linearLayout.removeAllViews();
+        linearLayout.removeViewsInLayout(0, localMail.size());
 
         for (int i = 0; i < localMail.size(); i++) {
             LinearLayout emailTextContainer = new LinearLayout(this);
@@ -103,7 +101,7 @@ public class ListMail extends AppCompatActivity {
                             intent.putExtra("subject", localMail.get(index).getSubject());
                             intent.putExtra("from", localMail.get(index).getFromPersonal());
                             intent.putExtra("date", localMail.get(index).getDate().getTime());
-                            startActivityForResult(intent, Activity.RESULT_OK);
+                            startActivityForResult(intent, 1);
                         }
                     });
                 }
@@ -181,7 +179,7 @@ public class ListMail extends AppCompatActivity {
                             intent.putExtra("subject", localMail.get(index).getSubject());
                             intent.putExtra("from", localMail.get(index).getFromPersonal());
                             intent.putExtra("date", localMail.get(index).getDate().getTime());
-                            startActivityForResult(intent, 0);
+                            startActivityForResult(intent, 1);
                         }
                     });
                 }
@@ -226,6 +224,8 @@ public class ListMail extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (data == null) return;
+
         int index = data.getExtras().getInt("index");
         Log.v(TAG, "Result Check: " + index);
         deleteMessage(index);
@@ -318,8 +318,8 @@ public class ListMail extends AppCompatActivity {
     }
 
     public void deleteMessage(int messageIndex) {
-        Log.v(TAG, "Removing: " + localMail.get(messageIndex).getSubject());
-        localMail.remove(messageIndex);
+        Log.v(TAG, "Removing: " + localMail.get(messageIndex - 1).getSubject());
+        localMail.remove(messageIndex - 1);
     }
 
     public List<Mail> getMessages(Authentication authentication, boolean checked) {
@@ -350,7 +350,6 @@ public class ListMail extends AppCompatActivity {
                 messageList.add(mail);
             }
 
-            emailFolder.expunge();
             emailFolder.close(true);
             store.close();
 
