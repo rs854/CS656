@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.mail.BodyPart;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -107,7 +108,7 @@ public class ReadMail extends AppCompatActivity {
 
                     Message[] foundMessages = emailFolder.search(term);
 
-
+                    foundMessages[0].setFlag(Flags.Flag.SEEN, true);
                     if (foundMessages[0].isMimeType("text/plain")){
                         contentString = foundMessages[0].getContent().toString().replaceAll("\r\n", "<br>");
                     } else if (foundMessages[0].isMimeType("text/html")) {

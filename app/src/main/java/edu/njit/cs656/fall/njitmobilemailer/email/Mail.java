@@ -11,16 +11,16 @@ import java.util.List;
 
 public class Mail { // TODO: I might delete this later on due to javax already having Message class
 
-    private String fromClient;
-    private String fromPersonal;
-    private String toClient;
-    private String subject;
+    private String fromClient = "";
+    private String fromPersonal = "";
+    private String toClient = "";
+    private String subject = "";
     private List<String> ccClient;
-    private String message;
-    private Date date;
-
+    private String message = "";
+    private Date date = new Date();
+    private Boolean isRead = false;
     private int index;
-    private String contentHash;
+    private String contentHash = "";
 
     public int getIndex() {
         return index;
@@ -30,6 +30,13 @@ public class Mail { // TODO: I might delete this later on due to javax already h
         this.index = index;
     }
 
+    public void setIsRead(Boolean read){
+        this.isRead = read;
+    }
+
+    public Boolean getIsRead(){
+        return isRead;
+    }
 
     public String getContentHash() {
         return contentHash;
