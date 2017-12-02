@@ -27,6 +27,11 @@ public class SendMail extends AppCompatActivity {
         return item.getText().toString();
     }
 
+    private String getSubject() {
+        EditText item = (EditText) findViewById(R.id.subject_editText);
+        return item.getText().toString();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -44,14 +49,6 @@ public class SendMail extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-//        View sendButton = findViewById(R.id.action_send);
-//        sendButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//
-//            }
-//        });
     }
 
     @Override
@@ -64,12 +61,12 @@ public class SendMail extends AppCompatActivity {
                     public void run() {
 
                         Mail letter = new Mail();
-                        letter.setSubject(((EditText) findViewById(R.id.subject_editText)).getText().toString());
-                        letter.setMessage(((EditText) findViewById(R.id.body_editText)).getText().toString());
+                        letter.setSubject(getSubject());
+                        letter.setMessage(getBody());
                         try {
                             Authentication auth = new Authentication();
-                            letter.setFromClient(auth.getUsername());
-                            letter.setToClient(((EditText) findViewById(R.id.to_editText)).getText().toString());
+                            letter.setFromClient(auth.getUsername(getBaseContext()));
+                            letter.setToClient(getTo());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
