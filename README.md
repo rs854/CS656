@@ -20,6 +20,7 @@ Fall 2017 Networking Course
 
 * Meghna - Quality Assurance
 * Robert - UI
+* Eugene - Backend Development
 
 ## GIT Repository Rules
 
