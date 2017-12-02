@@ -10,14 +10,11 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import org.jsoup.Jsoup;
-
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.mail.BodyPart;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -26,15 +23,6 @@ import javax.mail.Store;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.search.SearchTerm;
-
-import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
-import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
-
-import javax.mail.Flags;
-import javax.mail.Folder;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Store;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 
@@ -73,7 +61,8 @@ public class ReadMail extends AppCompatActivity {
         String fromString = extra.getString("from");
         from.setText(fromString);
 
-
+        mailIndex = extra.getInt("id");
+        //mailHash = extra.getString("hash");
 
         TextView dateTextView = (TextView) findViewById(R.id.datetime_textView);
         // Convert date from Long > Date > String
@@ -192,6 +181,7 @@ public class ReadMail extends AppCompatActivity {
                                     emailFolder.getMessage(mailIndex).setFlag(Flags.Flag.DELETED, true);
                                     emailFolder.close(true);
                                     store.close();
+
                                 } catch (MessagingException e) {
                                     Log.v(TAG, "Message error.");
                                 }
@@ -208,7 +198,8 @@ public class ReadMail extends AppCompatActivity {
                     }
                 }).start();
 
-                onBackPressed();
+                setResult(mailIndex, getIntent());
+                finish();
                 break;
             case android.R.id.home:
                 onBackPressed();
