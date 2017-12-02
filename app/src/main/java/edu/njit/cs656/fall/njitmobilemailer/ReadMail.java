@@ -171,7 +171,7 @@ public class ReadMail extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.action_delete:
-                new Thread(new Runnable() {
+                Thread runner = new Thread(new Runnable() {
                     @Override
                     public void run() {
                         Thread deleter = new Thread(new Runnable() {
@@ -185,8 +185,7 @@ public class ReadMail extends AppCompatActivity {
                                     store.connect("imap.gmail.com", authentication.getUsername(), authentication.getPassword());
                                     Folder emailFolder = store.getFolder("INBOX");
                                     emailFolder.open(Folder.READ_WRITE);
-                                    emailFolder.getMessage(mailIndex).setFlag(Flags.Flag.DELETED, true);
-                                    emailFolder.expunge();
+                                    emailFolder.getMessage(mailIndex + 1).setFlag(Flags.Flag.DELETED, true);
                                     emailFolder.close(true);
                                     store.close();
 
@@ -204,7 +203,16 @@ public class ReadMail extends AppCompatActivity {
                             Log.v(TAG, "Interrupted error.");
                         }
                     }
-                }).start();
+                });
+
+                // Need to wait for thread to finish.
+                try {
+                    runner.start();
+                    runner.join();
+                } catch (InterruptedException e) {
+                    Log.v(TAG, "Interrupted error.");
+
+                }
 
                 Intent intent = new Intent();
                 intent.putExtra("index", mailId);

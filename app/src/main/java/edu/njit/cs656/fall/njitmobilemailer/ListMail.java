@@ -329,6 +329,8 @@ public class ListMail extends AppCompatActivity {
             store.connect("imap.gmail.com", authentication.getUsername(), authentication.getPassword());
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_WRITE);
+            emailFolder.expunge();
+
             Message messages[] = emailFolder.getMessages();
             List<Mail> messageList = new ArrayList<>();
 
