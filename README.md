@@ -4,7 +4,6 @@ Fall 2017 Networking Course
 ## Team Members
 - Eugene Turgil
 - Robert Smith
-- Weng Li
 - Meghna Agnish
 
 ## Installation Instructions
