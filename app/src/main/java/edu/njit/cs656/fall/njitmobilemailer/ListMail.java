@@ -316,9 +316,10 @@ public class ListMail extends AppCompatActivity {
                                 }
                             }
                         }
-                        catch (Exception e){
+                        catch (Exception e) {
 
-                        Log.v(TAG, "remoteMail is not null.");
+                            Log.v(TAG, "remoteMail is not null.");
+                        }
 
                         // Only reDraw if number of emails changed
                         if (numOfEmails != size || numOfUnreadEmails != unread) {
