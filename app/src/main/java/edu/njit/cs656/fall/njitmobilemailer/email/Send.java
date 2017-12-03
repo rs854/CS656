@@ -4,30 +4,35 @@ package edu.njit.cs656.fall.njitmobilemailer.email;
  * Created by Eugen on 10/12/2017.
  */
 
-import java.util.*;
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
+import android.content.Context;
+
+import javax.mail.Authenticator;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+
+import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 
 
 public class Send {
-
     private static final String host = "smtp.gmail.com";
-    private static final String username = "et24@njit.edu";
-    private static final String password = "test"; // TODO: cannot store password in plain text
 
-    public static void Email(Mail letter) {
-        Properties properties = new Properties();
-        properties.setProperty("mail.smtp.host", host); // TODO: 10/12/2017 Add SSL/TLS port
-        properties.setProperty("mail.smtp.auth", "true");
-        properties.setProperty("mail.smtp.starttls.enable", "true");
-        properties.setProperty("mail.smtp.port", "587");
+    public static void Email(Mail letter, Context context) {
+        final Authentication authentication = new Authentication();
 
-        Session session = Session.getDefaultInstance(properties,
+        Session session = Session.getInstance(authentication.getSMTPProperties(),
                 new Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(username, password);
+                        return new PasswordAuthentication(authentication.getUsername(context), authentication.getPassword(context));
                     }
                 });
 
@@ -39,11 +44,11 @@ public class Send {
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(letter.getToClient()));
 
             message.setSubject(letter.getSubject());
-
+            Multipart mainPart = new MimeMultipart();
             BodyPart messageBody = new MimeBodyPart();
-
             messageBody.setText(letter.getMessage());
-
+            mainPart.addBodyPart(messageBody);
+            message.setContent(mainPart);
             Transport.send(message);
         } catch(MessagingException mex) {
             mex.printStackTrace();
