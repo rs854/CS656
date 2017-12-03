@@ -326,7 +326,7 @@ public class ListMail extends AppCompatActivity {
         try {
             Session emailSession = Session.getDefaultInstance(authentication.getIMAPProperties());
             Store store = emailSession.getStore("imaps");
-            store.connect("imap.gmail.com", authentication.getUsername(), authentication.getPassword());
+            store.connect("imap.gmail.com", authentication.getUsername(getBaseContext()), authentication.getPassword(getBaseContext()));
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_WRITE);
             emailFolder.expunge();

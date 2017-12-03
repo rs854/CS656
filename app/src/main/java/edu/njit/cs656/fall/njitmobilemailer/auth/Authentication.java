@@ -1,5 +1,9 @@
 package edu.njit.cs656.fall.njitmobilemailer.auth;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+
 import java.util.Properties;
 
 /**
@@ -7,10 +11,6 @@ import java.util.Properties;
  */
 
 public class Authentication {
-    // Temporary class to handle password/username retrieval
-
-    private static final String USERNAME = "TEST";
-    private static final String PASSWORD = "TEST";
 
     private Properties smtpProperties;
     private Properties pop3Properties;
@@ -30,23 +30,16 @@ public class Authentication {
         imapProperties.setProperty("mail.imaps.port", "993");
         imapProperties.setProperty("mail.imap.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         imapProperties.setProperty("mail.imap.socketFactory.fallback", "false");
-
-        pop3Properties = new Properties();
-        pop3Properties.setProperty("mail.pop3.host", "pop.gmail.com");
-        pop3Properties.setProperty("mail.pop3.port", "995");
-        pop3Properties.setProperty("mail.pop3.starttls.enable", "true");
     }
 
-    public String getUsername() {
-        return USERNAME;
+    public String getUsername(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString("username", "");
     }
 
-    public String getPassword() {
-        return PASSWORD;
-    }
-
-    public Properties getPOP3Properties() {
-        return pop3Properties;
+    public String getPassword(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString("password", "");
     }
 
     public Properties getSMTPProperties() {
