@@ -3,6 +3,7 @@ package edu.njit.cs656.fall.njitmobilemailer;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +31,8 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.event.MessageCountEvent;
+import javax.mail.event.MessageCountListener;
 import javax.mail.internet.InternetAddress;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
@@ -46,6 +49,8 @@ public class ListMail extends AppCompatActivity {
     private ListView list;
     private ListView.LayoutParams listView;
     private ProgressDialog progress;
+    private int numOfEmails = 0;
+    private int numOfUnreadEmails = 0;
 
 
     private String abbreviateString(String s, int maxLength){
@@ -145,10 +150,12 @@ public class ListMail extends AppCompatActivity {
     }
 
     @SuppressLint("ResourceType")
-    public void DrawRemoteMail() {
-        if (remoteMail.size() != 0) localMail.addAll(remoteMail);
-
-        for (int i = 0; i < remoteMail.size(); i++) {
+    public void reDrawLocalMail() {
+        //list = new ListView(this);
+    localMail.clear();
+	localMail.addAll(remoteMail);
+	linearLayout.removeAllViews();
+        for (int i = 0; i < localMail.size(); i++) {
             LinearLayout emailTextContainer = new LinearLayout(this);
             emailTextContainer.setOrientation(LinearLayout.VERTICAL);
 
@@ -188,11 +195,21 @@ public class ListMail extends AppCompatActivity {
 
             subjectView.setPadding(10, 5, 10, 5);
             subjectView.setTextSize(14);
-            subjectView.setText(abbreviateString(remoteMail.get(i).getSubject(), 40));
-            fromView.setText(abbreviateString(remoteMail.get(i).getFromPersonal(), 20));
+            if (!localMail.get(i).getIsRead()) {
+                subjectView.setTypeface(null, Typeface.BOLD);
+                fromView.setTypeface(null, Typeface.BOLD);
+                dateView.setTypeface(null, Typeface.BOLD);
+            }
+            else {
+                subjectView.setTypeface(null, Typeface.NORMAL);
+                fromView.setTypeface(null, Typeface.NORMAL);
+                dateView.setTypeface(null, Typeface.NORMAL);
+            }
+            subjectView.setText(abbreviateString(localMail.get(i).getSubject(), 40));
+            fromView.setText(abbreviateString(localMail.get(i).getFromPersonal(), 20));
 
             SimpleDateFormat formatter = new SimpleDateFormat("M/d h:mm a");
-            String s = formatter.format(remoteMail.get(i).getDate());
+            String s = formatter.format(localMail.get(i).getDate());
 
             relativeLayoutParams = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -217,6 +234,7 @@ public class ListMail extends AppCompatActivity {
             emailView.addView(checkBoxView);
             emailView.addView(emailTextContainer);
             emailView.setPadding(10, 10, 10, 10);
+
             linearLayout.addView(emailView, 0, listView);
 
         }
@@ -281,34 +299,46 @@ public class ListMail extends AppCompatActivity {
                 boolean check = false;
                 while (true) {
                     try {
-                        remoteMail = getMessages(new Authentication(), check);
+                        remoteMail = getMessages(new Authentication());
 
                         // The check is to get all initial emails loaded into the structure
                         // Then it is set to true so that only future unread emails are loaded
                         // to improve throughput.
-                        if (!check) check = true;
 
                         // This prevents app from crashing if the inbox is empty
-                        if (remoteMail == null) continue;
+                        int size = 0;
+                        int unread = 0;
+                        try{
+                            size = remoteMail.size();
+                            for (int i = 0; i < size; i++){
+                                if (!remoteMail.get(i).getIsRead()){
+                                    unread = unread + 1;
+                                }
+                            }
+                        }
+                        catch (Exception e) {
 
-                        Log.v(TAG, "remoteMail is not null.");
+                            Log.v(TAG, "remoteMail is not null.");
+                        }
 
-                        if (remoteMail.size() > 0) {
+                        // Only reDraw if number of emails changed
+                        if (numOfEmails != size || numOfUnreadEmails != unread) {
 
                             // Add drawing step here
                             linearLayout.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    DrawRemoteMail();
-                                    progress.dismiss();
+                                    reDrawLocalMail();
                                 }
                             });
                         }
-
+                        progress.dismiss();
+                        numOfEmails = size;
+                        numOfUnreadEmails = unread;
                         // Thread sleep time of 5 seconds
                         // TODO we should change this to a more appropriate number for production
                         Thread.sleep(5 * 1000);
-                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
                         Log.v(TAG, e.getMessage());
                     }
                 }
@@ -322,7 +352,7 @@ public class ListMail extends AppCompatActivity {
         localMail.remove(messageIndex - 1);
     }
 
-    public List<Mail> getMessages(Authentication authentication, boolean checked) {
+    public List<Mail> getMessages(Authentication authentication) {
         try {
             Session emailSession = Session.getDefaultInstance(authentication.getIMAPProperties());
             Store store = emailSession.getStore("imaps");
@@ -332,21 +362,22 @@ public class ListMail extends AppCompatActivity {
             emailFolder.expunge();
 
             Message messages[] = emailFolder.getMessages();
+
             List<Mail> messageList = new ArrayList<>();
 
             for (int i = 0; i < messages.length; i++) {
-                if (checked && messages[i].isSet(Flags.Flag.SEEN)) continue;
-
                 Mail mail = new Mail();
                 try {
-                    messages[i].setFlag(Flags.Flag.SEEN, true);
+//                    messages[i].setFlag(Flags.Flag.SEEN, true);
                     mail.setSubject(messages[i].getSubject());
                     mail.setIndex(messages[i].getMessageNumber());
                     mail.setDate(messages[i].getReceivedDate());
                     InternetAddress from = (InternetAddress) messages[i].getFrom()[0];
                     mail.setFromClient(from.getAddress());
                     mail.setFromPersonal(from.getPersonal());
-                } catch (MessagingException | IOException e) {
+                    mail.setIsRead(messages[i].isSet(Flags.Flag.SEEN));
+
+                } catch (Exception e) {
                     Log.v(TAG, e.getMessage());
                 }
                 messageList.add(mail);

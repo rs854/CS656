@@ -107,13 +107,14 @@ public class ReadMail extends AppCompatActivity {
 
                     Message[] foundMessages = emailFolder.search(term);
 
+                    foundMessages[0].setFlag(Flags.Flag.SEEN, true);
                     if (foundMessages == null) {
                         emailFolder.close(true);
                         store.close();
                         setResult(-1);
                         finish();
                     }
-
+                  
                     if (foundMessages[0].isMimeType("text/plain")){
                         contentString = foundMessages[0].getContent().toString().replaceAll("\r\n", "<br>");
                     } else if (foundMessages[0].isMimeType("text/html")) {
