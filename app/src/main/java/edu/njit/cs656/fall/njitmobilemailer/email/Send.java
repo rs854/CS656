@@ -4,6 +4,8 @@ package edu.njit.cs656.fall.njitmobilemailer.email;
  * Created by Eugen on 10/12/2017.
  */
 
+import android.content.Context;
+
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
 import javax.mail.Message;
@@ -21,17 +23,16 @@ import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 
 
 public class Send {
-
     private static final String host = "smtp.gmail.com";
 
-    public static void Email(Mail letter) {
+    public static void Email(Mail letter, Context context) {
         final Authentication authentication = new Authentication();
 
-        Session session = Session.getDefaultInstance(authentication.getSMTPProperties(),
+        Session session = Session.getInstance(authentication.getSMTPProperties(),
                 new Authenticator() {
                     @Override
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(authentication.getUsername(), authentication.getPassword());
+                        return new PasswordAuthentication(authentication.getUsername(context), authentication.getPassword(context));
                     }
                 });
 

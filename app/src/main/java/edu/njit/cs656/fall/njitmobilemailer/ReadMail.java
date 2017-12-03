@@ -1,6 +1,7 @@
 package edu.njit.cs656.fall.njitmobilemailer;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -10,12 +11,8 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
 
-import org.jsoup.Jsoup;
-
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import javax.mail.BodyPart;
 import javax.mail.Flags;
@@ -29,12 +26,13 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.search.SearchTerm;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
-import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
 
 public class ReadMail extends AppCompatActivity {
 
-    private Toolbar toolbar;
     public static final String TAG = "ReadMail";
+    private Toolbar toolbar;
+    private int mailIndex;
+    private int mailId;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -63,7 +61,8 @@ public class ReadMail extends AppCompatActivity {
         String fromString = extra.getString("from");
         from.setText(fromString);
 
-
+        mailIndex = extra.getInt("index");
+        mailId = extra.getInt("id");
 
         TextView dateTextView = (TextView) findViewById(R.id.datetime_textView);
         // Convert date from Long > Date > String
@@ -87,7 +86,7 @@ public class ReadMail extends AppCompatActivity {
                     Authentication authentication = new Authentication();
                     Session emailSession = Session.getDefaultInstance(authentication.getIMAPProperties());
                     Store store = emailSession.getStore("imaps");
-                    store.connect("imap.gmail.com", authentication.getUsername(), authentication.getPassword());
+                    store.connect("imap.gmail.com", authentication.getUsername(getBaseContext()), authentication.getPassword(getBaseContext()));
                     Folder emailFolder = store.getFolder("INBOX");
                     emailFolder.open(Folder.READ_WRITE);
                     Message messages[] = emailFolder.getMessages();
@@ -109,6 +108,13 @@ public class ReadMail extends AppCompatActivity {
                     Message[] foundMessages = emailFolder.search(term);
 
                     foundMessages[0].setFlag(Flags.Flag.SEEN, true);
+                    if (foundMessages == null) {
+                        emailFolder.close(true);
+                        store.close();
+                        setResult(-1);
+                        finish();
+                    }
+                  
                     if (foundMessages[0].isMimeType("text/plain")){
                         contentString = foundMessages[0].getContent().toString().replaceAll("\r\n", "<br>");
                     } else if (foundMessages[0].isMimeType("text/html")) {
@@ -160,9 +166,58 @@ public class ReadMail extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // TODO need to update ethe emails in the inbox in ListMail
+        // so that user can see that the email was deleted.
+
         switch (item.getItemId()) {
             case R.id.action_delete:
-                // TODO: Add code to delete the email here
+                Thread runner = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Thread deleter = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+
+                                    Authentication authentication = new Authentication();
+                                    Session emailSession = Session.getDefaultInstance(authentication.getIMAPProperties());
+                                    Store store = emailSession.getStore("imaps");
+                                    store.connect("imap.gmail.com", authentication.getUsername(getBaseContext()), authentication.getPassword(getBaseContext()));
+                                    Folder emailFolder = store.getFolder("INBOX");
+                                    emailFolder.open(Folder.READ_WRITE);
+                                    emailFolder.getMessage(mailIndex + 1).setFlag(Flags.Flag.DELETED, true);
+                                    emailFolder.close(true);
+                                    store.close();
+
+                                } catch (MessagingException e) {
+                                    Log.v(TAG, "Message error.");
+                                }
+
+                            }
+                        });
+
+                        deleter.run();
+                        try {
+                            deleter.join();
+                        } catch (InterruptedException e) {
+                            Log.v(TAG, "Interrupted error.");
+                        }
+                    }
+                });
+
+                // Need to wait for thread to finish.
+                try {
+                    runner.start();
+                    runner.join();
+                } catch (InterruptedException e) {
+                    Log.v(TAG, "Interrupted error.");
+
+                }
+
+                Intent intent = new Intent();
+                intent.putExtra("index", mailId);
+                setResult(1, intent);
+                finish();
                 break;
             case android.R.id.home:
                 onBackPressed();

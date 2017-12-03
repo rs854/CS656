@@ -20,17 +20,11 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.common.hash.Hashing;
-
-import org.jsoup.Jsoup;
-
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -40,7 +34,6 @@ import javax.mail.Store;
 import javax.mail.event.MessageCountEvent;
 import javax.mail.event.MessageCountListener;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMultipart;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 import edu.njit.cs656.fall.njitmobilemailer.email.Mail;
@@ -59,6 +52,7 @@ public class ListMail extends AppCompatActivity {
     private int numOfEmails = 0;
     private int numOfUnreadEmails = 0;
 
+
     private String abbreviateString(String s, int maxLength){
         // If string is longer than max length, truncate the string
         // and add '...'
@@ -76,6 +70,83 @@ public class ListMail extends AppCompatActivity {
     // instead of using final int
     public void setUpListener(int index, Listener listener) {
         listener.setUp(index);
+    }
+
+    public void DrawLocalMail() {
+        linearLayout.removeViewsInLayout(0, localMail.size());
+
+        for (int i = 0; i < localMail.size(); i++) {
+            LinearLayout emailTextContainer = new LinearLayout(this);
+            emailTextContainer.setOrientation(LinearLayout.VERTICAL);
+
+            LinearLayout emailView = new LinearLayout(this);
+            emailView.setOrientation(LinearLayout.HORIZONTAL);
+
+            RelativeLayout emailInnerView = new RelativeLayout(this);
+            RelativeLayout.LayoutParams relativeLayoutParams;
+            relativeLayoutParams = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
+            TextView subjectView = new TextView(this);
+            TextView dateView = new TextView(this);
+            TextView fromView = new TextView(this);
+            fromView.setId(1);
+            emailInnerView.addView(fromView, relativeLayoutParams);
+
+            setUpListener(i, new Listener() {
+                @Override
+                public void setUp(int index) {
+                    emailTextContainer.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(getApplicationContext(), ReadMail.class);
+                            intent.putExtra("id", localMail.get(index).getIndex());
+                            intent.putExtra("index", index);
+                            //intent.putExtra("hash", localMail.get(index).getContentHash());
+                            intent.putExtra("subject", localMail.get(index).getSubject());
+                            intent.putExtra("from", localMail.get(index).getFromPersonal());
+                            intent.putExtra("date", localMail.get(index).getDate().getTime());
+                            startActivityForResult(intent, 1);
+                        }
+                    });
+                }
+            });
+
+
+            subjectView.setPadding(10, 5, 10, 5);
+            subjectView.setTextSize(14);
+            subjectView.setText(abbreviateString(localMail.get(i).getSubject(), 40));
+            fromView.setText(abbreviateString(localMail.get(i).getFromPersonal(), 20));
+
+            SimpleDateFormat formatter = new SimpleDateFormat("M/d h:mm a");
+            String s = formatter.format(localMail.get(i).getDate());
+
+            relativeLayoutParams = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+            dateView.setText(s);
+            dateView.setGravity(5);
+            dateView.setTextAlignment(1);
+            fromView.setTextSize(20);
+
+            relativeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, fromView.getId());
+            relativeLayoutParams.addRule(RelativeLayout.ALIGN_TOP, fromView.getId()); // added top alignment rule
+
+            emailInnerView.addView(dateView, relativeLayoutParams);
+            emailInnerView.setPadding(10, 5, 10, 5);
+            emailTextContainer.addView(emailInnerView);
+            emailTextContainer.addView(subjectView);
+            emailTextContainer.setPadding(15, 15, 15, 15);
+
+            emailView.setGravity(16); //Center Vertical
+            CheckBox checkBoxView = new CheckBox(this);
+            emailView.addView(checkBoxView);
+            emailView.addView(emailTextContainer);
+            emailView.setPadding(10, 10, 10, 10);
+            linearLayout.addView(emailView, 0, listView);
+
+        }
     }
 
     @SuppressLint("ResourceType")
@@ -102,7 +173,6 @@ public class ListMail extends AppCompatActivity {
             fromView.setId(1);
             emailInnerView.addView(fromView, relativeLayoutParams);
 
-            // TODO set up Listener here
             setUpListener(((localMail.size() - remoteMail.size()) + i), new Listener() {
                 @Override
                 public void setUp(int index) {
@@ -110,10 +180,13 @@ public class ListMail extends AppCompatActivity {
                         @Override
                         public void onClick(View view) {
                             Intent intent = new Intent(getApplicationContext(), ReadMail.class);
+                            intent.putExtra("id", localMail.get(index).getIndex());
+                            intent.putExtra("index", index);
+                            //intent.putExtra("hash", localMail.get(index).getContentHash());
                             intent.putExtra("subject", localMail.get(index).getSubject());
                             intent.putExtra("from", localMail.get(index).getFromPersonal());
                             intent.putExtra("date", localMail.get(index).getDate().getTime());
-                            startActivity(intent);
+                            startActivityForResult(intent, 1);
                         }
                     });
                 }
@@ -167,6 +240,15 @@ public class ListMail extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (data == null) return;
+
+        int index = data.getExtras().getInt("index");
+        Log.v(TAG, "Result Check: " + index);
+        deleteMessage(index);
+        DrawLocalMail();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -236,9 +318,7 @@ public class ListMail extends AppCompatActivity {
                         }
                         catch (Exception e){
 
-                        }
-
-
+                        Log.v(TAG, "remoteMail is not null.");
 
                         // Only reDraw if number of emails changed
                         if (numOfEmails != size || numOfUnreadEmails != unread) {
@@ -266,24 +346,30 @@ public class ListMail extends AppCompatActivity {
 
     }
 
+    public void deleteMessage(int messageIndex) {
+        Log.v(TAG, "Removing: " + localMail.get(messageIndex - 1).getSubject());
+        localMail.remove(messageIndex - 1);
+    }
+
     public List<Mail> getMessages(Authentication authentication) {
         try {
             Session emailSession = Session.getDefaultInstance(authentication.getIMAPProperties());
             Store store = emailSession.getStore("imaps");
-            store.connect("imap.gmail.com", authentication.getUsername(), authentication.getPassword());
+            store.connect("imap.gmail.com", authentication.getUsername(getBaseContext()), authentication.getPassword(getBaseContext()));
             Folder emailFolder = store.getFolder("INBOX");
             emailFolder.open(Folder.READ_WRITE);
+            emailFolder.expunge();
+
             Message messages[] = emailFolder.getMessages();
 
             List<Mail> messageList = new ArrayList<>();
+
             for (int i = 0; i < messages.length; i++) {
                 Mail mail = new Mail();
                 try {
 //                    messages[i].setFlag(Flags.Flag.SEEN, true);
                     mail.setSubject(messages[i].getSubject());
-
                     mail.setIndex(messages[i].getMessageNumber());
-//                    mail.setContentHash(Hashing.sha256().hashString(mail.getMessage(), Charset.defaultCharset()).toString());
                     mail.setDate(messages[i].getReceivedDate());
                     InternetAddress from = (InternetAddress) messages[i].getFrom()[0];
                     mail.setFromClient(from.getAddress());
