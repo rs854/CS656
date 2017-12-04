@@ -14,7 +14,7 @@ android {
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "edu.njit.cs656.fall.njitmobilemailer"
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
@@ -56,7 +56,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.jsoup/jsoup
     compile group: 'org.jsoup', name: 'jsoup', version: '1.7.2'
     compile 'com.google.guava:guava:23.5-android'
-    compile 'com.google.android.gms:play-services:11.6.2'
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-all:1.9.5'
     testCompile 'org.powermock:powermock-api-mockito:1.5.5'
