@@ -106,14 +106,14 @@ public class ReadMail extends AppCompatActivity {
                     };
 
                     Message[] foundMessages = emailFolder.search(term);
-
-                    foundMessages[0].setFlag(Flags.Flag.SEEN, true);
                     if (foundMessages == null) {
                         emailFolder.close(true);
                         store.close();
                         setResult(-1);
                         finish();
                     }
+                    Log.v(TAG, foundMessages[0].getContentType());
+                    foundMessages[0].setFlag(Flags.Flag.SEEN, true);
                   
                     if (foundMessages[0].isMimeType("text/plain")){
                         contentString = foundMessages[0].getContent().toString().replaceAll("\r\n", "<br>");
@@ -133,6 +133,8 @@ public class ReadMail extends AppCompatActivity {
                             } else if (bodyContent.isMimeType("text/html")) {
                                 isHTML = true;
                                 htmlTmp.append(bodyContent.getContent().toString());
+                            } else {
+                                Log.v(TAG, bodyContent.getContentType());
                             }
                         }
                         if (isHTML){
@@ -151,9 +153,8 @@ public class ReadMail extends AppCompatActivity {
                 } catch(Exception e) {
                     e.printStackTrace();
                 }
-
                 final String finalContent = contentString;
-                runOnUiThread(new Runnable() {
+                findViewById(R.id.content_webView).post(new Runnable() {
                     @Override
                     public void run() {
                         WebView content = (WebView) findViewById(R.id.content_webView);
@@ -161,6 +162,7 @@ public class ReadMail extends AppCompatActivity {
                         progress.dismiss();
                     }
                 });
+
             }}).start();
     }
 
