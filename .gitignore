@@ -30,3 +30,4 @@ Thumbs.db
 build/intermediates/
 *.json
 *.rawproto
+build/android-profile/
