@@ -36,19 +36,27 @@ public class ReadMail extends AppCompatActivity {
     public String getMultipartText(MimeMultipart mimeContent) {
         try {
             StringBuilder textBuilder = new StringBuilder();
+            StringBuilder htmlBuilder = new StringBuilder();
+            Boolean isHTML = false;
             for (int j = 0; j < mimeContent.getCount(); j++) {
                 BodyPart bodyContent = mimeContent.getBodyPart(j);
-                if (bodyContent.isMimeType("text/plain")) {
+                if (bodyContent.isMimeType("text/html")) {
+                    htmlBuilder.append(bodyContent.getContent().toString());
+                    isHTML = true;
+                } else if (bodyContent.isMimeType("text/plain")) {
                     textBuilder.append(bodyContent.getContent().toString().replaceAll("\r\n", "<br>"));
-                    break;
-
-                } else if (bodyContent.isMimeType("text/html")) {
-                    textBuilder.append(bodyContent.getContent().toString());
                 } else if (bodyContent.getContent() instanceof MimeMultipart) {
                     textBuilder.append(getMultipartText((MimeMultipart) bodyContent.getContent()));
                 }
             }
-            return textBuilder.toString();
+            String returnString = "";
+            if(isHTML){
+                returnString = htmlBuilder.toString();
+            }
+            else{
+                returnString = textBuilder.toString();
+            }
+            return returnString;
         } catch (IOException | MessagingException ex) {
             Log.v(TAG, "Message error.");
         }
