@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.widget.TextView;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -21,9 +22,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Store;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.search.SearchTerm;
 
 import edu.njit.cs656.fall.njitmobilemailer.auth.Authentication;
 
@@ -33,6 +32,28 @@ public class ReadMail extends AppCompatActivity {
     private Toolbar toolbar;
     private int mailIndex;
     private int mailId;
+
+    public String getMultipartText(MimeMultipart mimeContent) {
+        try {
+            StringBuilder textBuilder = new StringBuilder();
+            for (int j = 0; j < mimeContent.getCount(); j++) {
+                BodyPart bodyContent = mimeContent.getBodyPart(j);
+                if (bodyContent.isMimeType("text/plain")) {
+                    textBuilder.append(bodyContent.getContent().toString().replaceAll("\r\n", "<br>"));
+                    break;
+
+                } else if (bodyContent.isMimeType("text/html")) {
+                    textBuilder.append(bodyContent.getContent().toString());
+                } else if (bodyContent.getContent() instanceof MimeMultipart) {
+                    textBuilder.append(getMultipartText((MimeMultipart) bodyContent.getContent()));
+                }
+            }
+            return textBuilder.toString();
+        } catch (IOException | MessagingException ex) {
+            Log.v(TAG, "Message error.");
+        }
+        return null;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -89,62 +110,18 @@ public class ReadMail extends AppCompatActivity {
                     store.connect("imap.gmail.com", authentication.getUsername(getBaseContext()), authentication.getPassword(getBaseContext()));
                     Folder emailFolder = store.getFolder("INBOX");
                     emailFolder.open(Folder.READ_WRITE);
-                    Message messages[] = emailFolder.getMessages();
+                    Message message = emailFolder.getMessage(mailIndex + 1);
 
-                    SearchTerm term = new SearchTerm() {
-                        public boolean match(Message message) {
-                            try {
-                                InternetAddress from = (InternetAddress) message.getFrom()[0];
-                                if (message.getSubject().compareTo(subjectString) == 0 && from.getPersonal().compareTo(fromString) == 0 && message.getReceivedDate().compareTo(date) == 0) {
-                                    return true;
-                                }
-                            } catch (MessagingException e) {
-                                e.printStackTrace();
-                            }
-                            return false;
-                        }
-                    };
-
-                    Message[] foundMessages = emailFolder.search(term);
-
-                    foundMessages[0].setFlag(Flags.Flag.SEEN, true);
-                    if (foundMessages == null) {
+                    if (message == null) {
                         emailFolder.close(true);
                         store.close();
                         setResult(-1);
                         finish();
                     }
-                  
-                    if (foundMessages[0].isMimeType("text/plain")){
-                        contentString = foundMessages[0].getContent().toString().replaceAll("\r\n", "<br>");
-                    } else if (foundMessages[0].isMimeType("text/html")) {
-                        contentString = foundMessages[0].getContent().toString();
-                    } else if (foundMessages[0].isMimeType("multipart/*")) {
 
-                        // extract the mime-multipart content
-                        MimeMultipart mimeContent = (MimeMultipart) foundMessages[0].getContent();
-                        StringBuilder htmlTmp = new StringBuilder();
-                        StringBuilder textTmp = new StringBuilder();
-                        boolean isHTML = false;
-                        for (int k = 0; k < mimeContent.getCount(); k++) {
-                            BodyPart bodyContent = mimeContent.getBodyPart(k);
-                            if (bodyContent.isMimeType("text/plain")) {
-                                textTmp.append(bodyContent.getContent().toString().replaceAll("\r\n", "<br>"));
-                            } else if (bodyContent.isMimeType("text/html")) {
-                                isHTML = true;
-                                htmlTmp.append(bodyContent.getContent().toString());
-                            }
-                        }
-                        if (isHTML){
-                            contentString = htmlTmp.toString();
-                        } else {
-                            contentString = textTmp.toString();
-                        }
-
-                    } else {
-                        Log.v(TAG, "Message is a type: " + foundMessages[0].getContentType());
-                        contentString = "NULL";
-                    }
+                    Log.v(TAG, message.getContentType());
+                    message.setFlag(Flags.Flag.SEEN, true);
+                    contentString = getMultipartText((MimeMultipart) message.getContent());
                     emailFolder.close(true);
                     store.close();
 

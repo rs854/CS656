@@ -71,12 +71,55 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private boolean loginStatus;
+
+    public boolean getLoginStatus() {
+        return loginStatus;
+    }
+
+    public void setLoginStatus(boolean status) {
+        loginStatus = status;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
+
+        final Authentication authentication = new Authentication();
+        if (!authentication.getUsername(getBaseContext()).isEmpty() && !authentication.getPassword(getBaseContext()).isEmpty()) {
+            Thread runner = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Authentication authentication = new Authentication();
+                    try {
+                        Session emailSession = Session.getDefaultInstance(authentication.getIMAPProperties());
+                        Store store = emailSession.getStore("imaps");
+                        store.connect("imap.gmail.com", authentication.getUsername(getBaseContext()), authentication.getPassword(getBaseContext()));
+                        store.close();
+                    } catch (Exception ex) {
+                        Log.v(TAG, ex.getMessage());
+                        setLoginStatus(false);
+                    }
+                    setLoginStatus(true);
+                }
+            });
+
+            try {
+                runner.start();
+                runner.join();
+            } catch (InterruptedException ex) {
+                Log.v(TAG, "Interruption detected.");
+            }
+
+            if (getLoginStatus()) {
+                Intent intent = new Intent(getApplicationContext(), ListMail.class);
+                startActivity(intent);
+                finish();
+            }
+        }
+
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 
